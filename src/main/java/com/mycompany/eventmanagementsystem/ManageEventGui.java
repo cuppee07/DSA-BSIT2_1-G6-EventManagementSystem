@@ -12,165 +12,185 @@ import javax.swing.JFrame;
  * @author Asus TUF
  */
 public class ManageEventGui extends JFrame {
-     static final Color PURPLE = new Color(142, 68, 173);
-    static final Color PINK = new Color(243, 224, 247);
-    static final Color TEXT = new Color(110, 30, 130);
-    static final Color LINE = new Color(200, 190, 210);
+   
+    private JPanel pnlDetails, pnlSearch, pnlList;
+    private JLabel hdrDetails, hdrSearch, hdrList;
+    private JLabel lblEventId, lblName, lblDate, lblCategory, lblBy;
+    private JTextField txtEventId, txtName, txtDate, txtSearchDate;
+    private JComboBox<String> cmbCategory, cmbSearchBy;
+    private JButton btnAdd, btnUpdate, btnDelete, btnClear, btnSearch;
+    private JTable tblEvents;
+    private JScrollPane scpEvents;
+ 
+    private static final String[] categories = {"Select Category", "Technology", "Health", "Arts"};
+    private static final String[] searchOptions = {"Date", "Category", "Name"};
+    private static final String[] columns = {"Event ID", "Name", "Date", "Category", "Attendees"};
+ 
+    private Color clrPurple = new Color(142, 68, 173);
+    private Color clrPink = new Color(243, 224, 247);
+    private Color clrText = new Color(110, 30, 130);
+    private Color clrLine = new Color(200, 190, 210);
  
     public ManageEventGui() {
+    
         setTitle("Event Management System");
         setSize(1000, 650);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
         setLayout(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
         getContentPane().setBackground(new Color(245, 240, 248));
  
-        EventDetailsPanel details = new EventDetailsPanel();
-        details.setBounds(15, 15, 570, 320);
-        add(details);
+        //Event Details panel
+        pnlDetails = new JPanel(null);
+        //x axis, y axis, width, height
+        pnlDetails.setBounds(15, 15, 570, 320);
+        pnlDetails.setBackground(Color.WHITE);
+        pnlDetails.setBorder(BorderFactory.createLineBorder(clrLine));
+        add(pnlDetails);
  
-        SearchPanel search = new SearchPanel();
-        search.setBounds(600, 15, 370, 320);
-        add(search);
+        hdrDetails = new JLabel("  Event Details");
+        hdrDetails.setBounds(0, 0, 568, 40);
+        hdrDetails.setOpaque(true);
+        hdrDetails.setBackground(clrPink);
+        hdrDetails.setForeground(clrText);
+        hdrDetails.setFont(new Font("Arial", Font.BOLD, 15));
+        pnlDetails.add(hdrDetails);
  
-        EventListPanel list = new EventListPanel();
-        list.setBounds(15, 350, 955, 230);
-        add(list);
-    }
+        lblEventId = new JLabel("Event ID:");
+        lblEventId.setBounds(20, 55, 100, 32);
+        pnlDetails.add(lblEventId);
  
-    // pink title bar
-    static JLabel header(String text, int width) {
-        JLabel label = new JLabel("  " + text);
-        label.setOpaque(true);
-        label.setBackground(PINK);
-        label.setForeground(TEXT);
-        label.setFont(new Font("Arial", Font.BOLD, 15));
-        label.setBounds(0, 0, width, 40);
-        return label;
-    }
+        lblName = new JLabel("Name:");
+        lblName.setBounds(20, 105, 100, 32);
+        pnlDetails.add(lblName);
  
-    // purple button (dark = filled purple, otherwise light)
-    static JButton button(String text, boolean dark, int x, int y, int w, int h) {
-        JButton b = new JButton(text);
-        b.setBounds(x, y, w, h);
-        b.setOpaque(true);
-        b.setFocusPainted(false);
-        b.setBorderPainted(false);
-        if (dark) {
-            b.setBackground(PURPLE);
-            b.setForeground(Color.WHITE);
-        } else {
-            b.setBackground(PINK);
-            b.setForeground(new Color(150, 100, 160));
-        }
-        return b;
-    }
+        lblDate = new JLabel("Date:");
+        lblDate.setBounds(20, 155, 100, 32);
+        pnlDetails.add(lblDate);
  
-    public static void main(String[] args) throws Exception {
-        // makes the button colors show on every computer
-        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+        lblCategory = new JLabel("Category:");
+        lblCategory.setBounds(20, 205, 100, 32);
+        pnlDetails.add(lblCategory);
  
-        ManageEventGui app = new ManageEventGui();
-        app.setVisible(true);
-    }
-}
+        txtEventId = new JTextField();
+        txtEventId.setBounds(150, 55, 395, 32);
+        pnlDetails.add(txtEventId);
  
-// Event Details panel
-class EventDetailsPanel extends JPanel {
+        txtName = new JTextField();
+        txtName.setBounds(150, 105, 395, 32);
+        pnlDetails.add(txtName);
  
-    public EventDetailsPanel() {
-        setLayout(null);
-        setBackground(Color.WHITE);
-        setBorder(BorderFactory.createLineBorder(ManageEventGui.LINE));
+        txtDate = new JTextField("mm/dd/yyyy");
+        txtDate.setBounds(150, 155, 395, 32);
+        txtDate.setForeground(Color.GRAY);
+        pnlDetails.add(txtDate);
  
-        add(ManageEventGui.header("Event Details", 568));
+        cmbCategory = new JComboBox<>(categories);
+        cmbCategory.setBounds(150, 205, 395, 32);
+        pnlDetails.add(cmbCategory);
  
-        JLabel idLabel = new JLabel("Event ID:");
-        idLabel.setBounds(20, 55, 100, 32);
-        add(idLabel);
-        JTextField idField = new JTextField();
-        idField.setBounds(150, 55, 395, 32);
-        add(idField);
+        btnAdd = new JButton("Add");
+        btnAdd.setBounds(20, 260, 122, 40);
+        btnAdd.setOpaque(true);
+        btnAdd.setFocusPainted(false);
+        btnAdd.setBorderPainted(false);
+        btnAdd.setBackground(clrPurple);
+        btnAdd.setForeground(Color.WHITE);
+        pnlDetails.add(btnAdd);
  
-        JLabel nameLabel = new JLabel("Name:");
-        nameLabel.setBounds(20, 105, 100, 32);
-        add(nameLabel);
-        JTextField nameField = new JTextField();
-        nameField.setBounds(150, 105, 395, 32);
-        add(nameField);
+        btnUpdate = new JButton("Update");
+        btnUpdate.setBounds(154, 260, 122, 40);
+        btnUpdate.setOpaque(true);
+        btnUpdate.setFocusPainted(false);
+        btnUpdate.setBorderPainted(false);
+        btnUpdate.setBackground(clrPink);
+        btnUpdate.setForeground(new Color(150, 100, 160));
+        pnlDetails.add(btnUpdate);
  
-        JLabel dateLabel = new JLabel("Date:");
-        dateLabel.setBounds(20, 155, 100, 32);
-        add(dateLabel);
-        JTextField dateField = new JTextField("mm/dd/yyyy");
-        dateField.setForeground(Color.GRAY);
-        dateField.setBounds(150, 155, 395, 32);
-        add(dateField);
+        btnDelete = new JButton("Delete");
+        btnDelete.setBounds(288, 260, 122, 40);
+        btnDelete.setOpaque(true);
+        btnDelete.setFocusPainted(false);
+        btnDelete.setBorderPainted(false);
+        btnDelete.setBackground(clrPink);
+        btnDelete.setForeground(new Color(150, 100, 160));
+        pnlDetails.add(btnDelete);
  
-        JLabel categoryLabel = new JLabel("Category:");
-        categoryLabel.setBounds(20, 205, 100, 32);
-        add(categoryLabel);
-        JComboBox<String> categoryBox = new JComboBox<>(new String[]{"Select Category", "Technology", "Health", "Arts"});
-        categoryBox.setBounds(150, 205, 395, 32);
-        add(categoryBox);
+        btnClear = new JButton("Clear");
+        btnClear.setBounds(422, 260, 122, 40);
+        btnClear.setOpaque(true);
+        btnClear.setFocusPainted(false);
+        btnClear.setBorderPainted(false);
+        btnClear.setBackground(clrPink);
+        btnClear.setForeground(new Color(150, 100, 160));
+        pnlDetails.add(btnClear);
  
-        add(ManageEventGui.button("Add", true, 20, 260, 122, 40));
-        add(ManageEventGui.button("Update", false, 154, 260, 122, 40));
-        add(ManageEventGui.button("Delete", false, 288, 260, 122, 40));
-        add(ManageEventGui.button("Clear", false, 422, 260, 122, 40));
-    }
-}
+        //Search Event panel
+        pnlSearch = new JPanel(null);
+        pnlSearch.setBounds(600, 15, 370, 320);
+        pnlSearch.setBackground(Color.WHITE);
+        pnlSearch.setBorder(BorderFactory.createLineBorder(clrLine));
+        add(pnlSearch);
  
-// Search panel
-class SearchPanel extends JPanel {
+        hdrSearch = new JLabel("  Search Event");
+        hdrSearch.setBounds(0, 0, 368, 40);
+        hdrSearch.setOpaque(true);
+        hdrSearch.setBackground(clrPink);
+        hdrSearch.setForeground(clrText);
+        hdrSearch.setFont(new Font("Arial", Font.BOLD, 15));
+        pnlSearch.add(hdrSearch);
  
-    public SearchPanel() {
-        setLayout(null);
-        setBackground(Color.WHITE);
-        setBorder(BorderFactory.createLineBorder(ManageEventGui.LINE));
+        lblBy = new JLabel("By:");
+        lblBy.setBounds(20, 55, 50, 32);
+        pnlSearch.add(lblBy);
  
-        add(ManageEventGui.header("Search Event", 368));
+        cmbSearchBy = new JComboBox<>(searchOptions);
+        cmbSearchBy.setBounds(80, 55, 270, 32);
+        pnlSearch.add(cmbSearchBy);
  
-        JLabel byLabel = new JLabel("By:");
-        byLabel.setBounds(20, 55, 50, 32);
-        add(byLabel);
-        JComboBox<String> byBox = new JComboBox<>(new String[]{"Date", "Category", "Name"});
-        byBox.setBounds(80, 55, 270, 32);
-        add(byBox);
+        txtSearchDate = new JTextField("mm/dd/yyyy");
+        txtSearchDate.setBounds(80, 105, 270, 32);
+        txtSearchDate.setForeground(Color.GRAY);
+        pnlSearch.add(txtSearchDate);
  
-        JTextField searchField = new JTextField("mm/dd/yyyy");
-        searchField.setForeground(Color.GRAY);
-        searchField.setBounds(80, 105, 270, 32);
-        add(searchField);
+        btnSearch = new JButton("Search");
+        btnSearch.setBounds(80, 155, 220, 40);
+        btnSearch.setOpaque(true);
+        btnSearch.setFocusPainted(false);
+        btnSearch.setBorderPainted(false);
+        btnSearch.setBackground(clrPurple);
+        btnSearch.setForeground(Color.WHITE);
+        pnlSearch.add(btnSearch);
  
-        add(ManageEventGui.button("Search", true, 80, 155, 220, 40));
-    }
-}
+        //Event List panel
+        pnlList = new JPanel(null);
+        pnlList.setBounds(15, 350, 955, 230);
+        pnlList.setBackground(Color.WHITE);
+        pnlList.setBorder(BorderFactory.createLineBorder(clrLine));
+        add(pnlList);
  
-// Event List panel
-class EventListPanel extends JPanel {
+        hdrList = new JLabel("  Event List");
+        hdrList.setBounds(0, 0, 953, 40);
+        hdrList.setOpaque(true);
+        hdrList.setBackground(clrPink);
+        hdrList.setForeground(clrText);
+        hdrList.setFont(new Font("Arial", Font.BOLD, 15));
+        pnlList.add(hdrList);
  
-    public EventListPanel() {
-        setLayout(null);
-        setBackground(Color.WHITE);
-        setBorder(BorderFactory.createLineBorder(ManageEventGui.LINE));
- 
-        add(ManageEventGui.header("Event List", 953));
- 
-        String[] columns = {"Event ID", "Name", "Date", "Category", "Attendees"};
         Object[][] rows = {
             {"EVT001", "Tech Summit", "2025-10-15", "Technology", 0},
             {"EVT002", "Health & Wellness", "2025-11-05", "Health", 0},
             {"EVT003", "Creative Expo", "2025-12-10", "Arts", 0}
         };
  
-        JTable table = new JTable(rows, columns);
-        table.setRowHeight(28);
-        table.getTableHeader().setBackground(new Color(245, 240, 248));
+        tblEvents = new JTable(rows, columns);
+        tblEvents.setRowHeight(28);
+        tblEvents.getTableHeader().setBackground(new Color(245, 240, 248));
  
-        JScrollPane scroll = new JScrollPane(table);
-        scroll.setBounds(15, 55, 922, 130);
-        add(scroll);
+        scpEvents = new JScrollPane(tblEvents);
+        scpEvents.setBounds(15, 55, 922, 130);
+        pnlList.add(scpEvents);
     }
-}
  
+}
+   
