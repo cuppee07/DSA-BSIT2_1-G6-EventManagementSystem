@@ -6,18 +6,24 @@ package com.mycompany.eventmanagementsystem;
 
 /**
  * hello i'm manabat
- * @author Carine
- * llance is here
- * lee is here
+ *
+ * @author Carine llance is here lee is here
  */
+import javax.swing.SwingUtilities;
+
 public class EventManagementSystem {
 
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
-        // TODO code application logic here
-        System.out.print("Hello World!");
-    }
     
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            CheckInGUI checkIn = new CheckInGUI();
+            ReportsGUI reports = new ReportsGUI();
+
+            checkIn.setVisible(true);
+            reports.setVisible(true);
+        });
+    }
 }
