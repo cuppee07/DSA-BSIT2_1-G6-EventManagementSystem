@@ -9,6 +9,7 @@ package com.mycompany.eventmanagementsystem;
  * @author Carine
  * llance is here
  * lee is here
+ * manabat is here
  */
 public class EventManagementSystem {
 
