@@ -9,7 +9,6 @@ package com.mycompany.eventmanagementsystem;
  * @author Carine
  * llance is here
  * lee is here
- * manabat is here
  */
 public class EventManagementSystem {
 
@@ -17,8 +16,8 @@ public class EventManagementSystem {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        ManageEventGui App = new ManageEventGui();
-        App.setVisible(true);
+        // TODO code application logic here
+        System.out.print("Hello World");
     }
     
 }
