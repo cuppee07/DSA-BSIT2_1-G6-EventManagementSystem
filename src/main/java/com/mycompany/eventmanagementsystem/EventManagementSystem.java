@@ -5,7 +5,7 @@
 package com.mycompany.eventmanagementsystem;
 
 /**
- *
+ * hello i'm manabat
  * @author Carine
  */
 public class EventManagementSystem {
