@@ -6,7 +6,7 @@ package com.mycompany.eventmanagementsystem;
 
 /**
  *
- * llance is here
+ * llance
  */
 public class EventManagementSystem {
 
