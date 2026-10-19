@@ -8,7 +8,7 @@ package com.mycompany.eventmanagementsystem;
  *
  * @author Carine
  */
-public class EventManagementSystem {
+public class Main {
 
     /**
      * @param args the command line arguments
