@@ -15,7 +15,7 @@ public class dsaProject {
     public static void main(String[] args) {
         // TODO code application logic here
         
-        Attendee attend = new Attendee ();
+        AttendeePanel attend = new AttendeePanel ();
         attend.setVisible(true);
         
     }   

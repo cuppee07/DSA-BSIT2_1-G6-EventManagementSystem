@@ -17,7 +17,7 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author User
  */
-public class Attendee extends JFrame implements ActionListener {
+public class AttendeePanel extends JFrame implements ActionListener {
 
     private DefaultListModel<String> listModel;
     private LinkedList<String> linkedlist;
@@ -37,7 +37,7 @@ public class Attendee extends JFrame implements ActionListener {
     private Color white = Color.WHITE;
     private Color background = new Color(248, 249, 255);
 
-    Attendee() {
+    AttendeePanel() {
 
         linkedlist = new LinkedList<>();
         listModel = new DefaultListModel<>();
