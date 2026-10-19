@@ -12,7 +12,6 @@ import java.util.LinkedList;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
-//test
 
 /**
  *
@@ -24,14 +23,14 @@ public class Attendee extends JFrame implements ActionListener {
     private LinkedList<String> linkedlist;
     private JList<String> list;
     private JScrollPane scrollpane;
-    private JTextField txtfield;
+    private JTextField txtfield, txtid, txtname, txtmail, txtsearch;
     private JPanel ad, sa, al;
     private JLabel lblid, lblmail, lblevent, lblname, lblby, lblad, lblsa, lblal;
     private TitledBorder titleB;
     private JButton btnadd, btnupdt, btndlt, btnclr, btnsrch;
     private JComboBox<String> cbevnt, cbby;
     private DefaultTableModel listTable;
-
+    private JTable attendeeTable;
     private Color blue = new Color(49, 70, 130);
     private Color purple = new Color(105, 103, 175);
     private Color lightPurple = new Color(231, 229, 250);
@@ -48,7 +47,6 @@ public class Attendee extends JFrame implements ActionListener {
         setLayout(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setBackground(background);
-
         
         JPanel ad = new JPanel();
         ad.setBounds(30, 30, 550, 250);
@@ -68,31 +66,31 @@ public class Attendee extends JFrame implements ActionListener {
         lblid.setBounds(20, 40, 70, 30);
         ad.add(lblid);
 
-        txtfield = new JTextField();
-        txtfield.setBounds(85, 40, 425, 30);
-        ad.add(txtfield);
+        txtid = new JTextField();
+        txtid.setBounds(85, 40, 425, 30);
+        ad.add(txtid);
 
         JLabel lblname = new JLabel("Name:");
         lblname.setBounds(20, 80, 70, 30);
         ad.add(lblname);
 
-        txtfield = new JTextField();
-        txtfield.setBounds(85, 80, 425, 30);
-        ad.add(txtfield);
+        txtname = new JTextField();
+        txtname.setBounds(85, 80, 425, 30);
+        ad.add(txtname);
 
         JLabel lblmail = new JLabel("Email:");
         lblmail.setBounds(20, 120, 70, 30);
         ad.add(lblmail);
 
-        txtfield = new JTextField();
-        txtfield.setBounds(85, 120, 425, 30);
-        ad.add(txtfield);
+        txtmail = new JTextField();
+        txtmail.setBounds(85, 120, 425, 30);
+        ad.add(txtmail);
 
         JLabel lblevent = new JLabel("Event:");
         lblevent.setBounds(20, 160, 70, 30);
         ad.add(lblevent);
 
-        JComboBox cbevnt = new JComboBox();
+        cbevnt = new JComboBox();
         cbevnt.setBounds(85, 160, 425, 30);
 
         cbevnt.addItem("Select Event");
@@ -100,7 +98,6 @@ public class Attendee extends JFrame implements ActionListener {
         cbevnt.addItem("EVENT002");
         cbevnt.addItem("EVENT003");
         ad.add(cbevnt);
-
         
         btnadd = new JButton("Add");
         btnadd.setBounds(20, 200, 100, 40);
@@ -110,8 +107,8 @@ public class Attendee extends JFrame implements ActionListener {
         btnadd.setContentAreaFilled(true);
         btnadd.setBorderPainted(false);
         ad.add(btnadd);
-
         
+      
         btnupdt = new JButton("Update");
         btnupdt.setBounds(150, 200, 100, 40);
         btnupdt.setBackground(lightPurple);
@@ -120,7 +117,6 @@ public class Attendee extends JFrame implements ActionListener {
         btnupdt.setContentAreaFilled(true);
         btnupdt.setBorderPainted(false);
         ad.add(btnupdt);
-
         
         btndlt = new JButton("Delete");
         btndlt.setBounds(280, 200, 100, 40);
@@ -130,8 +126,7 @@ public class Attendee extends JFrame implements ActionListener {
         btndlt.setContentAreaFilled(true);
         btndlt.setBorderPainted(false);
         ad.add(btndlt);
-
-        // Clear button
+        
         btnclr = new JButton("Clear");
         btnclr.setBounds(410, 200, 100, 40);
         btnclr.setBackground(lightPurple);
@@ -142,7 +137,6 @@ public class Attendee extends JFrame implements ActionListener {
         ad.add(btnclr);
 
 
-       
         JPanel sa = new JPanel();
         sa.setBounds(610, 30, 350, 250);
         sa.setBorder(BorderFactory.createLineBorder(lightPurple, 2));
@@ -161,19 +155,15 @@ public class Attendee extends JFrame implements ActionListener {
         lblby.setBounds(20, 40, 50, 30);
         sa.add(lblby);
 
-        JComboBox cbby = new JComboBox();
+        cbby = new JComboBox();
         cbby.setBounds(85, 40, 250, 30);
 
         cbby.addItem("Name:");
-        cbby.addItem("ID:");
-        cbby.addItem("Email:");
-        cbby.addItem("");
         sa.add(cbby);
 
-        txtfield = new JTextField("");
-        txtfield.setBounds(85, 80, 250, 30);
-        sa.add(txtfield);
-
+        txtsearch = new JTextField("");
+        txtsearch.setBounds(85, 80, 250, 30);
+        sa.add(txtsearch);
         
         btnsrch = new JButton("Search");
         btnsrch.setBounds(85, 120, 200, 40);
@@ -183,8 +173,6 @@ public class Attendee extends JFrame implements ActionListener {
         btnsrch.setContentAreaFilled(true);
         btnsrch.setBorderPainted(false);
         sa.add(btnsrch);
-
-
         
         JPanel al = new JPanel();
         al.setBounds(30, 290, 930, 280);
@@ -199,12 +187,11 @@ public class Attendee extends JFrame implements ActionListener {
         lblal.setBackground(lightPurple);
         lblal.setForeground(blue);
         al.add(lblal);
-
         
         String[] columns = {"ID", "Name", "Email", "Event ID"};
 
         listTable = new DefaultTableModel(columns, 0);
-        JTable attendeeTable = new JTable(listTable);
+        attendeeTable = new JTable(listTable);
 
         attendeeTable.setGridColor(lightPurple);
         attendeeTable.setSelectionBackground(lightPurple);
@@ -216,7 +203,6 @@ public class Attendee extends JFrame implements ActionListener {
         scrollpane = new JScrollPane(attendeeTable);
         scrollpane.setBounds(20, 50, 870, 200);
         al.add(scrollpane);
-
        
         btnadd.addActionListener(this);
         btnupdt.addActionListener(this);
@@ -230,7 +216,144 @@ public class Attendee extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        
+         if(e.getSource()==btnadd){
+             String id= txtid.getText().trim(); 
+             String name= txtname.getText().trim(); 
+             String mail= txtmail.getText().trim(); 
+             String event = cbevnt.getSelectedItem().toString();
+             
+              if (id.isEmpty() || name.isEmpty() || mail.isEmpty()
+                    || event.equals("Select Event")) {
 
+                JOptionPane.showMessageDialog(this,
+                        "Please complete all fields.");
+
+            } else {
+
+                boolean duplicate = false;
+
+                for (int i = 0; i < listTable.getRowCount(); i++) {
+                    if (listTable.getValueAt(i, 0).toString().equalsIgnoreCase(id)) {
+                        duplicate = true;
+                        break;
+                    }
+                }
+
+                if (duplicate) {
+                    JOptionPane.showMessageDialog(this,
+                            "This ID already exists.");
+                } else {
+                    listTable.addRow(new Object[]{id, name, mail, event});
+                    
+                    linkedlist.add(id + " - " + name + " - "
+                            + mail + " - " + event);
+                    
+                    JOptionPane.showMessageDialog(this, "Added succesfully");
+                    
+                    clearFields();
+                }
+             }
+         }
+          else if (e.getSource() == btnupdt) {
+              int row = attendeeTable.getSelectedRow();
+              
+              if (row == -1){
+              JOptionPane.showMessageDialog(this, "Please select an attendee to update");
+              
+          }else{
+             String id= txtid.getText().trim(); 
+             String name= txtname.getText().trim(); 
+             String mail= txtmail.getText().trim(); 
+             String event = cbevnt.getSelectedItem().toString();
+                  
+             if (id.isEmpty() || name.isEmpty() || mail.isEmpty()
+                    || event.equals("Select Event")) {
+                 
+                 JOptionPane.showMessageDialog(this, "Please complete all the fields.");
+             }else{
+                 
+                 listTable.setValueAt(id, row, 0);
+                 listTable.setValueAt(name, row, 1);
+                 listTable.setValueAt(mail, row, 2);
+                 listTable.setValueAt(event, row, 3);
+                 
+                 JOptionPane.showMessageDialog(this, "Updated successfully!");
+                 
+                 clearFields();  
+             }
+            }  
+          }
+         if(e.getSource()== btndlt){
+             
+             int row = attendeeTable.getSelectedRow();
+             
+             if (row == -1){
+                 JOptionPane.showMessageDialog(this, "Select an attendee to delete.");
+             }else{
+                 int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete attendee?",
+                         "Confirm Delete",
+                         JOptionPane.YES_NO_OPTION);
+                 
+             if (confirm == JOptionPane.YES_OPTION){
+                 listTable.removeRow(row);
+                 
+                 JOptionPane.showMessageDialog(this, "Attendee deleted successfully.");
+                 
+                 clearFields();
+          }         
+        }      
+      }
+         else if (e.getSource()== btnclr){
+                  clearFields();
+                  attendeeTable.clearSelection();
+         }
+         
+          else if (e.getSource() == btnsrch) {
+
+            String search = txtsearch.getText().trim();
+            String searchBy = cbby.getSelectedItem().toString();
+            int column = 1;
+
+            if (search.isEmpty() || search.equalsIgnoreCase("Enter Name")) {
+                JOptionPane.showMessageDialog(this,
+                        "Please enter a name, ID, or email to search.");
+                return;
+            }
+
+            if (searchBy.equals("ID")) {
+                column = 0;
+            } else if (searchBy.equals("Email")) {
+                column = 2;
+            }
+
+            boolean found = false;
+
+            for (int i = 0; i < listTable.getRowCount(); i++) {
+
+                String value = listTable.getValueAt(i, column).toString();
+
+                if (value.equalsIgnoreCase(search)) {
+
+                    String name = listTable.getValueAt(i, 1).toString();
+
+                    JOptionPane.showMessageDialog(this,
+                            name + " is here!");
+
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                JOptionPane.showMessageDialog(this,
+                        "Attendee not found.");
+            }
+        }
     }
-}
+    private void clearFields(){
+        txtid.setText("");
+        txtname.setText("");
+        txtmail.setText("");
+        cbevnt.setSelectedIndex(0);
+    }
+    }
