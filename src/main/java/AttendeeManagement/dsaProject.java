@@ -9,5 +9,16 @@ package AttendeeManagement;
  * @author User
  */
 public class dsaProject {
+/**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        // TODO code application logic here
+        
+        Attendee attend = new Attendee ();
+        attend.setVisible(true);
+        
+    }   
+
     
 }

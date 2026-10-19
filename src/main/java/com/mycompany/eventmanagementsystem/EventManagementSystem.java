@@ -16,7 +16,8 @@ public class EventManagementSystem {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        System.out.print("Hello World");
+        Attendee panel = new Attendee();
+        panel.setVisible(true);
     }
     
 }
