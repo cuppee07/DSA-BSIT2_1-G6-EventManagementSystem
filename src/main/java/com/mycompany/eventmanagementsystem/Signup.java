@@ -8,6 +8,7 @@ package com.mycompany.eventmanagementsystem;
  *
  * @author Carine
  */
+import database.DatabaseConnection;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;

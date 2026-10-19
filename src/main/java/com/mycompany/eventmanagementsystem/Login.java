@@ -4,6 +4,7 @@
  */
 package com.mycompany.eventmanagementsystem;
 
+import database.DatabaseConnection;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
