@@ -16,8 +16,8 @@ public class EventManagementSystem {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        WaitingList r = new WaitingList();
+        Registration r = new Registration();
         r.setVisible(true);
     }
-    
+      
 }
