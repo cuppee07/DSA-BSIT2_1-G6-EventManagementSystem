@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 
-package com.mycompany.eventmanagementsystem;
+package GUI;
 
     import java.awt.BorderLayout;
     import java.awt.Color;

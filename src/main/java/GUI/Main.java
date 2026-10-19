@@ -8,14 +8,15 @@ package GUI;
  *
  * @author Carine
  */
-public class EventManagementSystem {
+public class Main {
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        System.out.print("Hello World!");
+        Signup panel = new Signup();
+        panel.setVisible(true);
     }
     
 }
