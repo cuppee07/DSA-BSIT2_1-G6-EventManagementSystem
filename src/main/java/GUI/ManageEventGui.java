@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 /**
- * manabat is here
+ * manabat is here!
  */
 package GUI;
 import service.LinkedList;
@@ -27,7 +27,7 @@ public class ManageEventGui extends JFrame implements ActionListener{
     private LinkedList linkedList;
     private DefaultTableModel model; 
     
-    private static final String[] categories = {"Select Category", "Technology", "Health", "Arts"};
+    private static final String[] categories = {"Select Category", "Technology", "Business", "Arts"};
     private static final String[] searchOptions = {"Date", "Category", "Event ID"};
     private static final String[] columns = {"Event ID", "Name", "Date", "Category", "Attendees"};
  
