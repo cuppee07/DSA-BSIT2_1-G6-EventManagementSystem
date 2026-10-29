@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package AttendeeManagement;
+package GUI;
 
 import java.awt.Component;
 import java.awt.Color;
@@ -12,7 +12,7 @@ import java.util.LinkedList;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
-
+import java.awt.Font;
 /**
  *
  * @author User
@@ -27,7 +27,7 @@ public class AttendeePanel extends JFrame implements ActionListener {
     private JPanel ad, sa, al;
     private JLabel lblid, lblmail, lblevent, lblname, lblby, lblad, lblsa, lblal;
     private TitledBorder titleB;
-    private JButton btnadd, btnupdt, btndlt, btnclr, btnsrch;
+    private JButton btnadd, btnupdt, btndlt, btnclr, btnsrch, btnbck;
     private JComboBox<String> cbevnt, cbby;
     private DefaultTableModel listTable;
     private JTable attendeeTable;
@@ -36,6 +36,11 @@ public class AttendeePanel extends JFrame implements ActionListener {
     private Color lightPurple = new Color(231, 229, 250);
     private Color white = Color.WHITE;
     private Color background = new Color(248, 249, 255);
+    private Color tableGray = new Color(242, 242, 242);
+    private Color headerGray = new Color(230, 230, 230);
+    private Color gridGray = new Color(217, 217, 217);
+    private Color lightGray = new Color(245, 245, 245);
+
 
     AttendeePanel() {
 
@@ -48,8 +53,9 @@ public class AttendeePanel extends JFrame implements ActionListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setBackground(background);
         
+        // attendee details
         JPanel ad = new JPanel();
-        ad.setBounds(30, 30, 550, 250);
+        ad.setBounds(30, 30, 550, 260);
         ad.setBorder(BorderFactory.createLineBorder(lightPurple, 2));
         ad.setLayout(null);
         ad.setBackground(white);
@@ -60,85 +66,91 @@ public class AttendeePanel extends JFrame implements ActionListener {
         lblad.setOpaque(true);
         lblad.setBackground(lightPurple);
         lblad.setForeground(blue);
+        lblad.setBorder(
+                BorderFactory.createEmptyBorder(0,10,0,0));
         ad.add(lblad);
 
         JLabel lblid = new JLabel("ID:");
-        lblid.setBounds(20, 40, 70, 30);
+        lblid.setBounds(20, 50, 70, 30);
         ad.add(lblid);
 
         txtid = new JTextField();
-        txtid.setBounds(85, 40, 425, 30);
+        txtid.setBounds(85, 50, 425, 30);
         ad.add(txtid);
 
         JLabel lblname = new JLabel("Name:");
-        lblname.setBounds(20, 80, 70, 30);
+        lblname.setBounds(20, 90, 70, 30);
         ad.add(lblname);
 
         txtname = new JTextField();
-        txtname.setBounds(85, 80, 425, 30);
+        txtname.setBounds(85, 90, 425, 30);
         ad.add(txtname);
 
         JLabel lblmail = new JLabel("Email:");
-        lblmail.setBounds(20, 120, 70, 30);
+        lblmail.setBounds(20, 130, 70, 30);
         ad.add(lblmail);
 
         txtmail = new JTextField();
-        txtmail.setBounds(85, 120, 425, 30);
+        txtmail.setBounds(85, 130, 425, 30);
         ad.add(txtmail);
 
         JLabel lblevent = new JLabel("Event:");
-        lblevent.setBounds(20, 160, 70, 30);
+        lblevent.setBounds(20, 170, 70, 30);
         ad.add(lblevent);
 
         cbevnt = new JComboBox();
-        cbevnt.setBounds(85, 160, 425, 30);
+        cbevnt.setBounds(85, 170, 425, 30);
 
         cbevnt.addItem("Select Event");
-        cbevnt.addItem("EVENT001");
-        cbevnt.addItem("EVENT002");
-        cbevnt.addItem("EVENT003");
+        cbevnt.addItem("Tech Summit (EVT001)");
+        cbevnt.addItem("Art Workshop (EVT002)");
+        cbevnt.addItem("Business Forum (EVT003)");
         ad.add(cbevnt);
         
         btnadd = new JButton("Add");
-        btnadd.setBounds(20, 200, 100, 40);
+        btnadd.setBounds(20, 210, 100, 40);
         btnadd.setBackground(blue);
         btnadd.setForeground(white);
         btnadd.setOpaque(true);
         btnadd.setContentAreaFilled(true);
         btnadd.setBorderPainted(false);
+        btnadd.setFocusable(false);
         ad.add(btnadd);
         
       
         btnupdt = new JButton("Update");
-        btnupdt.setBounds(150, 200, 100, 40);
+        btnupdt.setBounds(150, 210, 100, 40);
         btnupdt.setBackground(lightPurple);
         btnupdt.setForeground(blue);
         btnupdt.setOpaque(true);
         btnupdt.setContentAreaFilled(true);
         btnupdt.setBorderPainted(false);
+        btnupdt.setFocusable(false);
         ad.add(btnupdt);
         
         btndlt = new JButton("Delete");
-        btndlt.setBounds(280, 200, 100, 40);
+        btndlt.setBounds(280, 210, 100, 40);
         btndlt.setBackground(lightPurple);
         btndlt.setForeground(blue);
         btndlt.setOpaque(true);
         btndlt.setContentAreaFilled(true);
         btndlt.setBorderPainted(false);
+        btndlt.setFocusable(false);
         ad.add(btndlt);
         
         btnclr = new JButton("Clear");
-        btnclr.setBounds(410, 200, 100, 40);
+        btnclr.setBounds(410, 210, 100, 40);
         btnclr.setBackground(lightPurple);
         btnclr.setForeground(blue);
         btnclr.setOpaque(true);
         btnclr.setContentAreaFilled(true);
         btnclr.setBorderPainted(false);
+        btnclr.setFocusable(false);
         ad.add(btnclr);
 
-
+        //search attendee
         JPanel sa = new JPanel();
-        sa.setBounds(610, 30, 350, 250);
+        sa.setBounds(610, 30, 350, 260);
         sa.setBorder(BorderFactory.createLineBorder(lightPurple, 2));
         sa.setBackground(white);
         sa.setLayout(null);
@@ -149,33 +161,38 @@ public class AttendeePanel extends JFrame implements ActionListener {
         lblsa.setOpaque(true);
         lblsa.setBackground(lightPurple);
         lblsa.setForeground(blue);
+        lblsa.setBorder(
+                BorderFactory.createEmptyBorder(0,10,0,0));
         sa.add(lblsa);
 
         JLabel lblby = new JLabel("By:");
-        lblby.setBounds(20, 40, 50, 30);
+        lblby.setBounds(20, 50, 50, 30);
         sa.add(lblby);
 
         cbby = new JComboBox();
-        cbby.setBounds(85, 40, 250, 30);
+        cbby.setBounds(85, 50, 250, 30);
 
         cbby.addItem("Name:");
         sa.add(cbby);
 
         txtsearch = new JTextField("");
-        txtsearch.setBounds(85, 80, 250, 30);
+        txtsearch.setBounds(85, 90, 250, 30);
         sa.add(txtsearch);
         
         btnsrch = new JButton("Search");
-        btnsrch.setBounds(85, 120, 200, 40);
-        btnsrch.setBackground(purple);
+        btnsrch.setBounds(85, 130, 200, 40);
+        btnsrch.setBackground(blue);
         btnsrch.setForeground(white);
         btnsrch.setOpaque(true);
         btnsrch.setContentAreaFilled(true);
         btnsrch.setBorderPainted(false);
+        btnsrch.setFocusable(false);
         sa.add(btnsrch);
         
+        //table
+        
         JPanel al = new JPanel();
-        al.setBounds(30, 290, 930, 280);
+        al.setBounds(30, 300, 930, 230);
         al.setBorder(BorderFactory.createLineBorder(lightPurple, 2));
         al.setLayout(null);
         al.setBackground(white);
@@ -184,31 +201,74 @@ public class AttendeePanel extends JFrame implements ActionListener {
         JLabel lblal = new JLabel("Attendee List");
         lblal.setBounds(0, 0, 930, 40);
         lblal.setOpaque(true);
-        lblal.setBackground(lightPurple);
+        lblal.setBackground(headerGray);
         lblal.setForeground(blue);
+        lblal.setBorder(
+                BorderFactory.createEmptyBorder(0,10,0,0));
         al.add(lblal);
         
         String[] columns = {"ID", "Name", "Email", "Event ID"};
 
         listTable = new DefaultTableModel(columns, 0);
         attendeeTable = new JTable(listTable);
+        
+    
+        attendeeTable.setBackground(Color.WHITE);
+        attendeeTable.setForeground(Color.BLACK);
+        attendeeTable.setFont(new Font("Arial", Font.PLAIN, 14));
+        attendeeTable.setRowHeight(42);
+        attendeeTable.setGridColor(new Color(217, 217, 217));
+        attendeeTable.setShowGrid(true);
+        attendeeTable.setIntercellSpacing(new java.awt.Dimension(1, 1));
 
-        attendeeTable.setGridColor(lightPurple);
-        attendeeTable.setSelectionBackground(lightPurple);
-        attendeeTable.setSelectionForeground(blue);
-
-        attendeeTable.getTableHeader().setBackground(lightPurple);
-        attendeeTable.getTableHeader().setForeground(blue);
+        attendeeTable.getTableHeader().setBackground(
+        new Color(245, 245, 245));
+        attendeeTable.getTableHeader().setForeground(
+        new Color(80, 80, 80));
+        attendeeTable.getTableHeader().setFont(
+        new Font("Arial", Font.BOLD, 14));
+        attendeeTable.getTableHeader().setPreferredSize(
+        new java.awt.Dimension(0, 40));
+        attendeeTable.getTableHeader().setOpaque(true);
+       
+        attendeeTable.setSelectionBackground(
+        new Color(231, 229, 250));
+        attendeeTable.setSelectionForeground(Color.BLACK);
+        
+        attendeeTable.setDefaultRenderer(
+        Object.class,
+        new javax.swing.table.DefaultTableCellRenderer()
+        );
+        
+        attendeeTable.setFocusable(false);
 
         scrollpane = new JScrollPane(attendeeTable);
-        scrollpane.setBounds(20, 50, 870, 200);
+        scrollpane.setBounds(20, 50, 870, 150);
+        scrollpane.getViewport().setBackground(Color.WHITE);
+        scrollpane.setBorder(BorderFactory.createEmptyBorder());
         al.add(scrollpane);
-       
+        
+        //back button
+        
+        btnbck = new JButton("Back");
+        btnbck.setBounds(30, 540 , 100, 40);      
+        btnbck.setBackground(lightPurple);
+        btnbck.setForeground(blue);
+        btnbck.setOpaque(true);
+        btnbck.setContentAreaFilled(true);
+        btnbck.setBorderPainted(false);
+        btnbck.setFocusable(false);
+        add(btnbck);
+        
+        
+        
         btnadd.addActionListener(this);
         btnupdt.addActionListener(this);
         btndlt.addActionListener(this);
         btnclr.addActionListener(this);
         btnsrch.addActionListener(this);
+        btnbck.addActionListener(this);
+
 
         setLocationRelativeTo(null);
     }
@@ -223,10 +283,15 @@ public class AttendeePanel extends JFrame implements ActionListener {
              String event = cbevnt.getSelectedItem().toString();
              
               if (id.isEmpty() || name.isEmpty() || mail.isEmpty()
-                    || event.equals("Select Event")) {
+        || event.equals("Select Event")) {
 
-                JOptionPane.showMessageDialog(this,
-                        "Please complete all fields.");
+         JOptionPane.showMessageDialog(this,
+            "Please complete all the fields.");
+
+            } else if (!mail.matches("^[A-Za-z0-9._%+-]+@gmail\\.com$")) {
+
+         JOptionPane.showMessageDialog(this,
+            "Please enter a valid Email address (example@gmail.com).");
 
             } else {
 
@@ -349,7 +414,12 @@ public class AttendeePanel extends JFrame implements ActionListener {
                         "Attendee not found.");
             }
         }
+          else if (e.getSource()== btnbck) {
+                dispose();
+                new Dashboard().setVisible(true);
+            }
     }
+   
     private void clearFields(){
         txtid.setText("");
         txtname.setText("");
