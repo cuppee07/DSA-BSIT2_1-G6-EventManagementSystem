@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 /**
- * manabat is here
+ * manabat is here!
  */
 package GUI;
 import service.LinkedList;
