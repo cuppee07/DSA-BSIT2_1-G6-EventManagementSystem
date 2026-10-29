@@ -53,7 +53,7 @@ public class Signup extends JFrame implements ActionListener {
         JLabel iconLabel = new JLabel();
         iconLabel.setBounds(165, 135, iconWidth, iconHeight);
         
-        URL imgURL = getClass().getResource("/icons/eventplan.png");
+        URL imgURL = getClass().getResource("/GUIicons/eventplan.png");
         if (imgURL != null) {
             ImageIcon originalIcon = new ImageIcon(imgURL);
             Image scaledImage = originalIcon.getImage().getScaledInstance(iconWidth, iconHeight, Image.SCALE_SMOOTH);
