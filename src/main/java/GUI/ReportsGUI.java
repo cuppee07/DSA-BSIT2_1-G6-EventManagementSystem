@@ -11,6 +11,8 @@ public class ReportsGUI extends JFrame {
 
     private static final Color PRIMARY = new Color(0x4A55A2);
     private static final Color PRIMARY_HOVER = new Color(0x5A66B3);
+    private static final Color SECONDARY = new Color(0xE9ECF8);
+    private static final Color SECONDARY_HOVER = new Color(0xDCE0F2);
     private static final Color CARD_HEADER = new Color(0xE4E8F5);
     private static final Color WINDOW_BG = new Color(0xEDF0F7);
     private static final Color TABLE_HEADER = new Color(0xF1F3FA);
@@ -30,6 +32,7 @@ public class ReportsGUI extends JFrame {
     private JRadioButton feedbackRadio = createRadio("Feedback Report", false);
     private JRadioButton summaryRadio = createRadio("Event Summary", false);
     private RoundedButton generateBtn = new RoundedButton("Generate");
+    private RoundedButton backBtn = new RoundedButton("Back", false);
 
     private JComboBox<String> eventCombo = new JComboBox<>(new String[]{"Tech Summit (EVT001)"});
     private JLabel totalRegisteredValue = new JLabel("50");
@@ -60,6 +63,14 @@ public class ReportsGUI extends JFrame {
         mainPanel.add(createLeftSide(), BorderLayout.WEST);
         mainPanel.add(createRightSide(), BorderLayout.CENTER);
         setContentPane(mainPanel);
+
+        backBtn.addActionListener(e -> goBack());
+    }
+
+    /** Closes this screen and goes back to the Dashboard. */
+    private void goBack() {
+        dispose();
+        new Dashboard(); // Dashboard shows itself in its constructor
     }
 
     private JPanel createLeftSide() {
@@ -87,6 +98,13 @@ public class ReportsGUI extends JFrame {
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setBackground(Color.WHITE);
         wrapper.add(content, BorderLayout.NORTH);
+
+        backBtn.setPreferredSize(new Dimension(110, 38));
+        JPanel bottomRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        bottomRow.setBackground(Color.WHITE);
+        bottomRow.setBorder(new EmptyBorder(0, 20, 20, 20));
+        bottomRow.add(backBtn);
+        wrapper.add(bottomRow, BorderLayout.SOUTH);
 
         JPanel card = createCard("Select Report", wrapper, BOLD, 10);
         card.setPreferredSize(new Dimension(300, 0));
@@ -253,6 +271,10 @@ public class ReportsGUI extends JFrame {
         return generateBtn;
     }
 
+    public JButton getBackBtn() {
+        return backBtn;
+    }
+
     public JComboBox<String> getEventCombo() {
         return eventCombo;
     }
@@ -347,10 +369,17 @@ public class ReportsGUI extends JFrame {
 
     private static class RoundedButton extends JButton {
 
+        private final boolean primary;
+
         public RoundedButton(String text) {
+            this(text, true);
+        }
+
+        public RoundedButton(String text, boolean primary) {
             super(text);
+            this.primary = primary;
             setFont(BOLD);
-            setForeground(Color.WHITE);
+            setForeground(primary ? Color.WHITE : TITLE);
             setContentAreaFilled(false);
             setBorderPainted(false);
             setFocusPainted(false);
@@ -362,13 +391,23 @@ public class ReportsGUI extends JFrame {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            Color color = getModel().isRollover() ? PRIMARY_HOVER : PRIMARY;
+            Color color;
+            if (primary) {
+                color = getModel().isRollover() ? PRIMARY_HOVER : PRIMARY;
+            } else {
+                color = getModel().isRollover() ? SECONDARY_HOVER : SECONDARY;
+            }
             if (getModel().isPressed()) {
                 color = color.darker();
             }
 
             g2.setColor(color);
             g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+
+            if (!primary) {
+                g2.setColor(BORDER);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+            }
             g2.dispose();
             super.paintComponent(g);
         }

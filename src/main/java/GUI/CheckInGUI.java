@@ -6,6 +6,10 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.*;
 import java.awt.*;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CheckInGUI extends JFrame {
 
@@ -22,6 +26,7 @@ public class CheckInGUI extends JFrame {
     private static final Color TEXT = new Color(0x2B2F45);
     private static final Color HINT = new Color(0x9AA0BC);
     private static final Color RED = new Color(0xE0314B);
+    private static final Color GREEN = new Color(0x1E8E3E);
 
     private static final Font NORMAL = new Font("Segoe UI", Font.PLAIN, 14);
     private static final Font BOLD = new Font("Segoe UI", Font.BOLD, 14);
@@ -32,15 +37,22 @@ public class CheckInGUI extends JFrame {
     private RoundedButton searchBtn = new RoundedButton("Search", true);
     private RoundedButton checkInBtn = new RoundedButton("Check-in", true);
     private RoundedButton cancelBtn = new RoundedButton("Cancel", false);
+    private RoundedButton backBtn = new RoundedButton("Back", false);
 
-    private JLabel idValue = new JLabel("A001");
-    private JLabel nameValue = new JLabel("Carine Ilagan");
-    private JLabel emailValue = new JLabel("carine@email.com");
-    private JLabel eventValue = new JLabel("Tech Summit (EVT001)");
-    private JLabel statusValue = new JLabel("Not Checked In");
+    private JLabel idValue = new JLabel("-");
+    private JLabel nameValue = new JLabel("-");
+    private JLabel emailValue = new JLabel("-");
+    private JLabel eventValue = new JLabel("-");
+    private JLabel statusValue = new JLabel("-");
 
     private DefaultTableModel tableModel;
     private JTable table;
+
+    // attendee data kept inside this screen (sample data, no repository)
+    private final List<Attendee> attendees = new ArrayList<>();
+    private final List<Attendee> checkedInList = new ArrayList<>();
+    // the attendee currently shown in the "Attendee Information" card
+    private Attendee currentAttendee;
 
     public CheckInGUI() {
         super("Event Management System");
@@ -62,6 +74,181 @@ public class CheckInGUI extends JFrame {
         mainPanel.add(createLeftSide(), BorderLayout.WEST);
         mainPanel.add(createRightSide(), BorderLayout.CENTER);
         setContentPane(mainPanel);
+
+        loadSampleAttendees();
+        wireEvents();
+        refreshCheckedInTable();
+    }
+
+    // ================= LOGIC =================
+
+    private void wireEvents() {
+        searchBtn.addActionListener(e -> searchAttendee());
+        searchField.addActionListener(e -> searchAttendee()); // Enter key
+        checkInBtn.addActionListener(e -> checkInAttendee());
+        cancelBtn.addActionListener(e -> clearForm());
+        backBtn.addActionListener(e -> goBack());
+
+        // hint changes with the "Search by" choice
+        searchByCombo.addActionListener(e -> {
+            String by = String.valueOf(searchByCombo.getSelectedItem());
+            searchField.setHint("Enter " + by.toLowerCase() + "...");
+            searchField.repaint();
+        });
+    }
+
+    private void searchAttendee() {
+        String keyword = searchField.getText().trim();
+        if (keyword.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter something to search.",
+                    "Search", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        String by = String.valueOf(searchByCombo.getSelectedItem());
+        List<Attendee> results = search(by, keyword);
+
+        if (results.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "\"" + keyword + "\" is not on the list.",
+                    "Not Found", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Attendee chosen;
+        if (results.size() == 1) {
+            chosen = results.get(0);
+        } else {
+            // several matches (e.g. two "Maria") -> let the user pick
+            Object pick = JOptionPane.showInputDialog(this,
+                    "More than one match. Choose one:", "Multiple Results",
+                    JOptionPane.QUESTION_MESSAGE, null,
+                    results.toArray(), results.get(0));
+            if (pick == null) {
+                return; // cancelled
+            }
+            chosen = (Attendee) pick;
+        }
+
+        showAttendee(chosen);
+        JOptionPane.showMessageDialog(this,
+                chosen.getName() + " is on the list."
+                + (chosen.isCheckedIn() ? "\nAlready checked in at " + chosen.getCheckInTime() + "." : ""),
+                "Attendee Found", JOptionPane.INFORMATION_MESSAGE);
+
+        // if already checked in, highlight them in the right-side table
+        if (chosen.isCheckedIn()) {
+            for (int row = 0; row < tableModel.getRowCount(); row++) {
+                if (chosen.getId().equals(tableModel.getValueAt(row, 0))) {
+                    table.setRowSelectionInterval(row, row);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void checkInAttendee() {
+        if (currentAttendee == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Search for an attendee first.", "Check-in", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (!checkIn(currentAttendee)) {
+            JOptionPane.showMessageDialog(this,
+                    currentAttendee.getName() + " is already checked in.",
+                    "Check-in", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        refreshCheckedInTable();
+        showAttendee(currentAttendee); // updates status to green "Checked In"
+        JOptionPane.showMessageDialog(this,
+                currentAttendee.getName() + " checked in at " + currentAttendee.getCheckInTime() + ".",
+                "Check-in Successful", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    /** Fills the "Attendee Information" card. */
+    private void showAttendee(Attendee a) {
+        currentAttendee = a;
+        idValue.setText(a.getId());
+        nameValue.setText(a.getName());
+        emailValue.setText(a.getEmail());
+        eventValue.setText(a.getEvent());
+        if (a.isCheckedIn()) {
+            statusValue.setText("Checked In");
+            statusValue.setForeground(GREEN);
+        } else {
+            statusValue.setText("Not Checked In");
+            statusValue.setForeground(RED);
+        }
+    }
+
+    /** Closes this screen and goes back to the Dashboard. */
+    private void goBack() {
+        dispose();
+        new Dashboard(); // Dashboard shows itself in its constructor
+    }
+
+    // ================= DATA (replaces the repository) =================
+
+    private void loadSampleAttendees() {
+        attendees.add(new Attendee("A001", "Carine Ilagan", "carine@email.com", "Tech Summit"));
+        attendees.add(new Attendee("A002", "John Santos", "john@email.com", "Tech Summit"));
+        attendees.add(new Attendee("A003", "Maria Reyes", "maria@email.com", "Tech Summit"));
+        attendees.add(new Attendee("A004", "James Cruz", "james@email.com", "Tech Summit"));
+    }
+
+    /** Finds attendees by "Name" (partial match), "ID" (exact) or "Email" (partial match). */
+    private List<Attendee> search(String by, String keyword) {
+        String key = keyword.trim().toLowerCase();
+        List<Attendee> found = new ArrayList<>();
+        for (Attendee a : attendees) {
+            boolean match;
+            switch (by) {
+                case "ID":
+                    match = a.getId().equalsIgnoreCase(key);
+                    break;
+                case "Email":
+                    match = a.getEmail().toLowerCase().contains(key);
+                    break;
+                default:
+                    match = a.getName().toLowerCase().contains(key);
+                    break;
+            }
+            if (match) {
+                found.add(a);
+            }
+        }
+        return found;
+    }
+
+    /** Marks the attendee as checked in. Returns false if they already were. */
+    private boolean checkIn(Attendee a) {
+        if (a.isCheckedIn()) {
+            return false;
+        }
+        a.setCheckInTime(LocalTime.now().format(DateTimeFormatter.ofPattern("hh:mm a")));
+        checkedInList.add(a);
+        return true;
+    }
+
+    private void clearForm() {
+        currentAttendee = null;
+        searchField.setText("");
+        idValue.setText("-");
+        nameValue.setText("-");
+        emailValue.setText("-");
+        eventValue.setText("-");
+        statusValue.setText("-");
+        statusValue.setForeground(TEXT);
+        table.clearSelection();
+    }
+
+    /** Rebuilds the right-side table from the shared data. */
+    private void refreshCheckedInTable() {
+        tableModel.setRowCount(0);
+        for (Attendee a : checkedInList) {
+            tableModel.addRow(new Object[]{a.getId(), a.getName(), a.getCheckInTime()});
+        }
     }
 
     private JPanel createLeftSide() {
@@ -76,6 +263,13 @@ public class CheckInGUI extends JFrame {
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setBackground(Color.WHITE);
         wrapper.add(content, BorderLayout.NORTH);
+
+        backBtn.setPreferredSize(new Dimension(110, 38));
+        JPanel bottomRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        bottomRow.setBackground(Color.WHITE);
+        bottomRow.setBorder(new EmptyBorder(0, 12, 12, 12));
+        bottomRow.add(backBtn);
+        wrapper.add(bottomRow, BorderLayout.SOUTH);
 
         JPanel card = createCard("Check-in Attendee", wrapper, BOLD, 10);
         card.setPreferredSize(new Dimension(430, 0));
@@ -135,7 +329,6 @@ public class CheckInGUI extends JFrame {
         addInfoRow(body, 2, "Email:", emailValue);
         addInfoRow(body, 3, "Event:", eventValue);
         addInfoRow(body, 4, "Status:", statusValue);
-        statusValue.setForeground(RED);
 
         checkInBtn.setPreferredSize(new Dimension(0, 42));
         cancelBtn.setPreferredSize(new Dimension(0, 42));
@@ -187,8 +380,6 @@ public class CheckInGUI extends JFrame {
                 return false;
             }
         };
-        tableModel.addRow(new Object[]{"A002", "John Santos", "09:15 AM"});
-        tableModel.addRow(new Object[]{"A003", "Maria Reyes", "09:22 AM"});
 
         table = new JTable(tableModel);
         table.setFont(NORMAL);
@@ -260,6 +451,10 @@ public class CheckInGUI extends JFrame {
         return cancelBtn;
     }
 
+    public JButton getBackBtn() {
+        return backBtn;
+    }
+
     public JLabel getIdValue() {
         return idValue;
     }
@@ -288,6 +483,56 @@ public class CheckInGUI extends JFrame {
         return tableModel;
     }
 
+    /** Simple attendee record used by this screen. */
+    private static class Attendee {
+
+        private final String id;
+        private final String name;
+        private final String email;
+        private final String event;
+        private String checkInTime; // null = not checked in yet
+
+        Attendee(String id, String name, String email, String event) {
+            this.id = id;
+            this.name = name;
+            this.email = email;
+            this.event = event;
+        }
+
+        String getId() {
+            return id;
+        }
+
+        String getName() {
+            return name;
+        }
+
+        String getEmail() {
+            return email;
+        }
+
+        String getEvent() {
+            return event;
+        }
+
+        String getCheckInTime() {
+            return checkInTime;
+        }
+
+        void setCheckInTime(String checkInTime) {
+            this.checkInTime = checkInTime;
+        }
+
+        boolean isCheckedIn() {
+            return checkInTime != null;
+        }
+
+        @Override
+        public String toString() { // shown in the "Multiple Results" dialog
+            return name + " (" + id + ")";
+        }
+    }
+
     private static class HeaderRenderer extends DefaultTableCellRenderer {
 
         @Override
@@ -307,9 +552,13 @@ public class CheckInGUI extends JFrame {
 
     private static class HintTextField extends JTextField {
 
-        private final String hint;
+        private String hint;
 
         public HintTextField(String hint) {
+            this.hint = hint;
+        }
+
+        public void setHint(String hint) {
             this.hint = hint;
         }
 
