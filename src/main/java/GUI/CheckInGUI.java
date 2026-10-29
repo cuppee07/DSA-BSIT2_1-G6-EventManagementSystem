@@ -10,6 +10,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class CheckInGUI extends JFrame {
 
@@ -48,9 +49,11 @@ public class CheckInGUI extends JFrame {
     private DefaultTableModel tableModel;
     private JTable table;
 
-    // attendee data kept inside this screen (sample data, no repository)
-    private final List<Attendee> attendees = new ArrayList<>();
-    private final List<Attendee> checkedInList = new ArrayList<>();
+    // shared with the Registration screen: everyone registered there shows up here
+    private final AttendeeStore store = AttendeeStore.getInstance();
+    // called whenever Registration registers someone: show them here, ready to check in
+    private final Consumer<Attendee> onRegistered
+            = a -> SwingUtilities.invokeLater(() -> showAttendee(a));
     // the attendee currently shown in the "Attendee Information" card
     private Attendee currentAttendee;
 
@@ -75,9 +78,14 @@ public class CheckInGUI extends JFrame {
         mainPanel.add(createRightSide(), BorderLayout.CENTER);
         setContentPane(mainPanel);
 
-        loadSampleAttendees();
         wireEvents();
         refreshCheckedInTable();
+
+        // opened after registering? show the latest registered attendee, ready to check in
+        Attendee latest = store.getLatestNotCheckedIn();
+        if (latest != null) {
+            showAttendee(latest);
+        }
     }
 
     // ================= LOGIC =================
@@ -88,6 +96,15 @@ public class CheckInGUI extends JFrame {
         checkInBtn.addActionListener(e -> checkInAttendee());
         cancelBtn.addActionListener(e -> clearForm());
         backBtn.addActionListener(e -> goBack());
+
+        // live updates from the Registration screen
+        store.addRegistrationListener(onRegistered);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent e) {
+                store.removeRegistrationListener(onRegistered);
+            }
+        });
 
         // hint changes with the "Search by" choice
         searchByCombo.addActionListener(e -> {
@@ -106,7 +123,7 @@ public class CheckInGUI extends JFrame {
         }
 
         String by = String.valueOf(searchByCombo.getSelectedItem());
-        List<Attendee> results = search(by, keyword);
+        List<Attendee> results = store.search(by, keyword);
 
         if (results.isEmpty()) {
             JOptionPane.showMessageDialog(this, "\"" + keyword + "\" is not on the list.",
@@ -152,7 +169,7 @@ public class CheckInGUI extends JFrame {
                     "Search for an attendee first.", "Check-in", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        if (!checkIn(currentAttendee)) {
+        if (!store.checkIn(currentAttendee)) {
             JOptionPane.showMessageDialog(this,
                     currentAttendee.getName() + " is already checked in.",
                     "Check-in", JOptionPane.INFORMATION_MESSAGE);
@@ -188,49 +205,6 @@ public class CheckInGUI extends JFrame {
         new Dashboard(); // Dashboard shows itself in its constructor
     }
 
-    // ================= DATA (replaces the repository) =================
-
-    private void loadSampleAttendees() {
-        attendees.add(new Attendee("A001", "Carine Ilagan", "carine@email.com", "Tech Summit"));
-        attendees.add(new Attendee("A002", "John Santos", "john@email.com", "Tech Summit"));
-        attendees.add(new Attendee("A003", "Maria Reyes", "maria@email.com", "Tech Summit"));
-        attendees.add(new Attendee("A004", "James Cruz", "james@email.com", "Tech Summit"));
-    }
-
-    /** Finds attendees by "Name" (partial match), "ID" (exact) or "Email" (partial match). */
-    private List<Attendee> search(String by, String keyword) {
-        String key = keyword.trim().toLowerCase();
-        List<Attendee> found = new ArrayList<>();
-        for (Attendee a : attendees) {
-            boolean match;
-            switch (by) {
-                case "ID":
-                    match = a.getId().equalsIgnoreCase(key);
-                    break;
-                case "Email":
-                    match = a.getEmail().toLowerCase().contains(key);
-                    break;
-                default:
-                    match = a.getName().toLowerCase().contains(key);
-                    break;
-            }
-            if (match) {
-                found.add(a);
-            }
-        }
-        return found;
-    }
-
-    /** Marks the attendee as checked in. Returns false if they already were. */
-    private boolean checkIn(Attendee a) {
-        if (a.isCheckedIn()) {
-            return false;
-        }
-        a.setCheckInTime(LocalTime.now().format(DateTimeFormatter.ofPattern("hh:mm a")));
-        checkedInList.add(a);
-        return true;
-    }
-
     private void clearForm() {
         currentAttendee = null;
         searchField.setText("");
@@ -246,7 +220,7 @@ public class CheckInGUI extends JFrame {
     /** Rebuilds the right-side table from the shared data. */
     private void refreshCheckedInTable() {
         tableModel.setRowCount(0);
-        for (Attendee a : checkedInList) {
+        for (Attendee a : store.getCheckedIn()) {
             tableModel.addRow(new Object[]{a.getId(), a.getName(), a.getCheckInTime()});
         }
     }
@@ -483,8 +457,99 @@ public class CheckInGUI extends JFrame {
         return tableModel;
     }
 
-    /** Simple attendee record used by this screen. */
-    private static class Attendee {
+    /**
+     * Shared list of registered attendees. Registration adds people here,
+     * and this screen reads from it, so anyone registered can be checked in.
+     */
+    public static class AttendeeStore {
+
+        private static final AttendeeStore INSTANCE = new AttendeeStore();
+
+        public static AttendeeStore getInstance() {
+            return INSTANCE;
+        }
+
+        private final List<Attendee> attendees = new ArrayList<>();
+        private final List<Attendee> checkedIn = new ArrayList<>();
+        private final List<Consumer<Attendee>> listeners = new ArrayList<>();
+
+        private AttendeeStore() {
+        }
+
+        /** Called by Registration when someone gets a slot in an event. */
+        public Attendee register(String id, String name, String email, String event) {
+            Attendee a = new Attendee(id, name, email, event);
+            attendees.add(a);
+            // tell any open Check-in screen, so the new attendee shows up right away
+            for (Consumer<Attendee> l : new ArrayList<>(listeners)) {
+                l.accept(a);
+            }
+            return a;
+        }
+
+        public void addRegistrationListener(Consumer<Attendee> listener) {
+            listeners.add(listener);
+        }
+
+        public void removeRegistrationListener(Consumer<Attendee> listener) {
+            listeners.remove(listener);
+        }
+
+        /** The most recently registered attendee who has not been checked in yet (or null). */
+        public Attendee getLatestNotCheckedIn() {
+            for (int i = attendees.size() - 1; i >= 0; i--) {
+                if (!attendees.get(i).isCheckedIn()) {
+                    return attendees.get(i);
+                }
+            }
+            return null;
+        }
+
+        /** Finds attendees by "Name" (partial match), "ID" (exact) or "Email" (partial match). */
+        public List<Attendee> search(String by, String keyword) {
+            String key = keyword.trim().toLowerCase();
+            List<Attendee> found = new ArrayList<>();
+            for (Attendee a : attendees) {
+                boolean match;
+                switch (by) {
+                    case "ID":
+                        match = a.getId().equalsIgnoreCase(key);
+                        break;
+                    case "Email":
+                        match = a.getEmail().toLowerCase().contains(key);
+                        break;
+                    default:
+                        match = a.getName().toLowerCase().contains(key);
+                        break;
+                }
+                if (match) {
+                    found.add(a);
+                }
+            }
+            return found;
+        }
+
+        /** Marks the attendee as checked in. Returns false if they already were. */
+        public boolean checkIn(Attendee a) {
+            if (a.isCheckedIn()) {
+                return false;
+            }
+            a.setCheckInTime(LocalTime.now().format(DateTimeFormatter.ofPattern("hh:mm a")));
+            checkedIn.add(a);
+            return true;
+        }
+
+        public List<Attendee> getAll() {
+            return new ArrayList<>(attendees);
+        }
+
+        public List<Attendee> getCheckedIn() {
+            return new ArrayList<>(checkedIn);
+        }
+    }
+
+    /** One registered attendee. */
+    public static class Attendee {
 
         private final String id;
         private final String name;
@@ -499,23 +564,23 @@ public class CheckInGUI extends JFrame {
             this.event = event;
         }
 
-        String getId() {
+        public String getId() {
             return id;
         }
 
-        String getName() {
+        public String getName() {
             return name;
         }
 
-        String getEmail() {
+        public String getEmail() {
             return email;
         }
 
-        String getEvent() {
+        public String getEvent() {
             return event;
         }
 
-        String getCheckInTime() {
+        public String getCheckInTime() {
             return checkInTime;
         }
 
@@ -523,7 +588,7 @@ public class CheckInGUI extends JFrame {
             this.checkInTime = checkInTime;
         }
 
-        boolean isCheckedIn() {
+        public boolean isCheckedIn() {
             return checkInTime != null;
         }
 
