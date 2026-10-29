@@ -6,6 +6,10 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ReportsGUI extends JFrame {
 
@@ -29,19 +33,34 @@ public class ReportsGUI extends JFrame {
     private static final Font BIG = new Font("Segoe UI", Font.BOLD, 16);
 
     private JRadioButton attendanceRadio = createRadio("Attendance Report", true);
-    private JRadioButton feedbackRadio = createRadio("Feedback Report", false);
     private JRadioButton summaryRadio = createRadio("Event Summary", false);
     private RoundedButton generateBtn = new RoundedButton("Generate");
     private RoundedButton backBtn = new RoundedButton("Back", false);
 
-    private JComboBox<String> eventCombo = new JComboBox<>(new String[]{"Tech Summit (EVT001)"});
-    private JLabel totalRegisteredValue = new JLabel("50");
-    private JLabel totalCheckedInValue = new JLabel("42");
-    private JLabel attendanceRateValue = new JLabel("84%");
-    private JLabel waitingListValue = new JLabel("8");
+    private JComboBox<String> eventCombo = new JComboBox<>();
+    private JLabel totalRegisteredValue = new JLabel("-");
+    private JLabel totalCheckedInValue = new JLabel("-");
+    private JLabel attendanceRateValue = new JLabel("-");
+    private JLabel waitingListValue = new JLabel("-");
 
-    private DefaultTableModel tableModel;
+    private static final String ATTENDANCE_VIEW = "Attendance Report";
+    private static final String SUMMARY_VIEW = "Event Summary";
+
+    private DefaultTableModel tableModel;      // attendee list
     private JTable table;
+
+    // event dropdown of the Attendance Report (Event Summary has its own: eventCombo)
+    private JComboBox<String> attendanceEventCombo = new JComboBox<>();
+
+    private final List<EventInfo> events = new ArrayList<>();
+    private boolean selectingEvent; // stops the two dropdowns from triggering each other
+
+    private JLabel attendeeHeader; // title of the Attendee List card
+    // event ID -> the attendees registered for that event: {ID, Name, Email, Status}
+    private final Map<String, List<Object[]>> attendeesByEvent = new LinkedHashMap<>();
+
+    private JPanel reportCards;  // switches between the two report views
+    private JLabel rightHeader;  // title of the right-side card
 
     public ReportsGUI() {
         super("Event Management System");
@@ -65,6 +84,16 @@ public class ReportsGUI extends JFrame {
         setContentPane(mainPanel);
 
         backBtn.addActionListener(e -> goBack());
+
+        // switch the right side when a report is selected
+        attendanceRadio.addActionListener(e -> showReport(ATTENDANCE_VIEW));
+        summaryRadio.addActionListener(e -> showReport(SUMMARY_VIEW));
+    }
+
+    /** Shows the chosen report on the right side and updates its title. */
+    private void showReport(String view) {
+        ((CardLayout) reportCards.getLayout()).show(reportCards, view);
+        rightHeader.setText(view);
     }
 
     /** Closes this screen and goes back to the Dashboard. */
@@ -76,7 +105,6 @@ public class ReportsGUI extends JFrame {
     private JPanel createLeftSide() {
         ButtonGroup group = new ButtonGroup();
         group.add(attendanceRadio);
-        group.add(feedbackRadio);
         group.add(summaryRadio);
 
         generateBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -88,8 +116,6 @@ public class ReportsGUI extends JFrame {
         content.setBackground(Color.WHITE);
         content.setBorder(new EmptyBorder(20, 20, 20, 20));
         content.add(attendanceRadio);
-        content.add(Box.createVerticalStrut(14));
-        content.add(feedbackRadio);
         content.add(Box.createVerticalStrut(14));
         content.add(summaryRadio);
         content.add(Box.createVerticalStrut(30));
@@ -126,21 +152,57 @@ public class ReportsGUI extends JFrame {
     }
 
     private JPanel createRightSide() {
-        JPanel top = new JPanel(new BorderLayout(0, 10));
-        top.setBackground(Color.WHITE);
-        top.add(createEventRow(), BorderLayout.NORTH);
-        top.add(createStatsBox(), BorderLayout.CENTER);
+        loadEvents();
 
-        JPanel body = new JPanel(new BorderLayout(0, 12));
+        reportCards = new JPanel(new CardLayout());
+        reportCards.setBackground(Color.WHITE);
+        reportCards.add(createAttendanceView(), ATTENDANCE_VIEW);
+        reportCards.add(createSummaryView(), SUMMARY_VIEW);
+
+        JPanel body = new JPanel(new BorderLayout());
         body.setBackground(Color.WHITE);
         body.setBorder(new EmptyBorder(14, 14, 14, 14));
-        body.add(top, BorderLayout.NORTH);
-        body.add(createAttendeeList(), BorderLayout.CENTER);
+        body.add(reportCards, BorderLayout.CENTER);
 
-        return createCard("Attendance Report", body, BIG, 16);
+        JPanel card = createCard(ATTENDANCE_VIEW, body, BIG, 16);
+        rightHeader = (JLabel) ((BorderLayout) card.getLayout()).getLayoutComponent(BorderLayout.NORTH);
+
+        // choosing an event in either dropdown updates both reports
+        java.awt.event.ActionListener onPick = e -> {
+            if (!selectingEvent) {
+                selectEvent(((JComboBox<?>) e.getSource()).getSelectedIndex());
+            }
+        };
+        attendanceEventCombo.addActionListener(onPick);
+        eventCombo.addActionListener(onPick);
+        selectEvent(0); // first event by default
+
+        return card;
     }
 
-    private JPanel createEventRow() {
+    /** Attendance Report: event dropdown on top (like Event Summary), attendee list below. */
+    private JPanel createAttendanceView() {
+        JPanel view = new JPanel(new BorderLayout(0, 12));
+        view.setBackground(Color.WHITE);
+        view.add(createEventRow(attendanceEventCombo), BorderLayout.NORTH);
+        view.add(createAttendeeList(), BorderLayout.CENTER);
+        return view;
+    }
+
+    /** Event Summary: event picker and the totals. */
+    private JPanel createSummaryView() {
+        JPanel top = new JPanel(new BorderLayout(0, 10));
+        top.setBackground(Color.WHITE);
+        top.add(createEventRow(eventCombo), BorderLayout.NORTH);
+        top.add(createStatsBox(), BorderLayout.CENTER);
+
+        JPanel view = new JPanel(new BorderLayout());
+        view.setBackground(Color.WHITE);
+        view.add(top, BorderLayout.NORTH);
+        return view;
+    }
+
+    private JPanel createEventRow(JComboBox<String> eventCombo) {
         JLabel eventLabel = new JLabel("Event:");
         eventLabel.setFont(NORMAL);
         eventLabel.setForeground(TEXT);
@@ -172,6 +234,10 @@ public class ReportsGUI extends JFrame {
     }
 
     private void addStatRow(JPanel panel, int row, String labelText, JLabel valueLabel) {
+        addStatRow(panel, row, labelText, valueLabel, 190);
+    }
+
+    private void addStatRow(JPanel panel, int row, String labelText, JLabel valueLabel, int labelWidth) {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(6, 4, 6, 4);
         gbc.anchor = GridBagConstraints.WEST;
@@ -179,7 +245,7 @@ public class ReportsGUI extends JFrame {
         JLabel label = new JLabel(labelText);
         label.setFont(NORMAL);
         label.setForeground(TEXT);
-        label.setPreferredSize(new Dimension(190, 20));
+        label.setPreferredSize(new Dimension(labelWidth, 20));
         gbc.gridx = 0;
         gbc.gridy = row;
         panel.add(label, gbc);
@@ -192,6 +258,97 @@ public class ReportsGUI extends JFrame {
         panel.add(valueLabel, gbc);
     }
 
+    /** The events in the dropdown. They start with no participants. */
+    private void loadEvents() {
+        events.add(new EventInfo("EVT001", "Tech Summit"));
+        events.add(new EventInfo("EVT002", "Art Workshop"));
+        events.add(new EventInfo("EVT003", "Business Forum"));
+
+        for (EventInfo ev : events) {
+            attendeesByEvent.put(ev.id, new ArrayList<>());
+            String label = ev.name + " (" + ev.id + ")";
+            eventCombo.addItem(label);
+            attendanceEventCombo.addItem(label);
+        }
+    }
+
+    // ================= INPUT (call these to put data in the reports) =================
+
+    /** Adds a new event to both dropdowns. */
+    public void addEvent(String id, String name) {
+        events.add(new EventInfo(id, name));
+        attendeesByEvent.put(id, new ArrayList<>());
+
+        String label = name + " (" + id + ")";
+        selectingEvent = true;
+        eventCombo.addItem(label);
+        attendanceEventCombo.addItem(label);
+        selectingEvent = false;
+
+        if (events.size() == 1) {
+            selectEvent(0);
+        }
+    }
+
+    /** Adds a participant to an event, then refreshes the reports. */
+    public void addAttendee(String eventId, String id, String name, String email, boolean checkedIn) {
+        List<Object[]> list = attendeesByEvent.get(eventId);
+        if (list == null) {
+            return; // unknown event
+        }
+        list.add(new Object[]{id, name, email, checkedIn ? "Checked-in" : "Not Checked-in"});
+        refreshSelectedEvent();
+    }
+
+    /** Sets how many people are on an event's waiting list. */
+    public void setWaitingList(String eventId, int count) {
+        for (EventInfo ev : events) {
+            if (ev.id.equals(eventId)) {
+                ev.waiting = count;
+            }
+        }
+        refreshSelectedEvent();
+    }
+
+    private void refreshSelectedEvent() {
+        selectEvent(attendanceEventCombo.getSelectedIndex());
+    }
+
+    /** Shows the chosen event everywhere: attendee list, event details and summary totals. */
+    private void selectEvent(int index) {
+        if (index < 0 || index >= events.size()) {
+            return;
+        }
+        EventInfo ev = events.get(index);
+
+        selectingEvent = true;
+        attendanceEventCombo.setSelectedIndex(index);
+        eventCombo.setSelectedIndex(index);
+        selectingEvent = false;
+
+        // Attendee List
+        List<Object[]> rows = attendeesByEvent.get(ev.id);
+        int total = 0;
+        int checkedIn = 0;
+        tableModel.setRowCount(0);
+        if (rows != null) {
+            for (Object[] row : rows) {
+                tableModel.addRow(row);
+                total++;
+                if ("Checked-in".equals(row[3])) {
+                    checkedIn++;
+                }
+            }
+        }
+        attendeeHeader.setText("Attendee List - " + ev.name);
+
+        // Event Summary totals
+        totalRegisteredValue.setText(String.valueOf(total));
+        totalCheckedInValue.setText(String.valueOf(checkedIn));
+        attendanceRateValue.setText(total == 0 ? "0%" : Math.round(100.0 * checkedIn / total) + "%");
+        waitingListValue.setText(String.valueOf(ev.waiting));
+    }
+
     private JPanel createAttendeeList() {
         tableModel = new DefaultTableModel(new String[]{"ID", "Name", "Email", "Status"}, 0) {
             @Override
@@ -199,36 +356,42 @@ public class ReportsGUI extends JFrame {
                 return false;
             }
         };
-        tableModel.addRow(new Object[]{"A001", "Carine Ilagan", "carine@email.com", "Checked-in"});
-        tableModel.addRow(new Object[]{"A002", "John Santos", "john@email.com", "Checked-in"});
-        tableModel.addRow(new Object[]{"A003", "Maria Reyes", "maria@email.com", "Checked-in"});
-        tableModel.addRow(new Object[]{"A004", "James Cruz", "james@email.com", "Not Checked-in"});
 
         table = new JTable(tableModel);
-        table.setFont(NORMAL);
-        table.setForeground(TEXT);
-        table.setRowHeight(34);
-        table.setGridColor(GRID);
-        table.setSelectionBackground(CARD_HEADER);
-        table.setSelectionForeground(TEXT);
-        table.setFillsViewportHeight(true);
-        table.setIntercellSpacing(new Dimension(0, 1));
-        table.getColumnModel().getColumn(0).setPreferredWidth(70);
-        table.getColumnModel().getColumn(1).setPreferredWidth(170);
-        table.getColumnModel().getColumn(2).setPreferredWidth(190);
-        table.getColumnModel().getColumn(3).setPreferredWidth(130);
+        styleTable(table, 70, 170, 190, 130);
+        table.getColumnModel().getColumn(3).setCellRenderer(new StatusRenderer());
+
+        JPanel card = createTableCard("Attendee List", table);
+        attendeeHeader = (JLabel) ((BorderLayout) card.getLayout()).getLayoutComponent(BorderLayout.NORTH);
+        return card;
+    }
+
+    /** Shared look for both tables. */
+    private void styleTable(JTable t, int... columnWidths) {
+        t.setFont(NORMAL);
+        t.setForeground(TEXT);
+        t.setRowHeight(34);
+        t.setGridColor(GRID);
+        t.setSelectionBackground(CARD_HEADER);
+        t.setSelectionForeground(TEXT);
+        t.setFillsViewportHeight(true);
+        t.setIntercellSpacing(new Dimension(0, 1));
+        for (int i = 0; i < columnWidths.length; i++) {
+            t.getColumnModel().getColumn(i).setPreferredWidth(columnWidths[i]);
+        }
 
         DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer();
         cellRenderer.setBorder(new EmptyBorder(0, 12, 0, 0));
-        table.setDefaultRenderer(Object.class, cellRenderer);
-        table.getColumnModel().getColumn(3).setCellRenderer(new StatusRenderer());
+        t.setDefaultRenderer(Object.class, cellRenderer);
 
-        JTableHeader header = table.getTableHeader();
+        JTableHeader header = t.getTableHeader();
         header.setReorderingAllowed(false);
         header.setPreferredSize(new Dimension(0, 34));
         header.setDefaultRenderer(new HeaderRenderer());
+    }
 
-        JScrollPane scrollPane = new JScrollPane(table);
+    private JPanel createTableCard(String title, JTable t) {
+        JScrollPane scrollPane = new JScrollPane(t);
         scrollPane.setBorder(new LineBorder(BORDER, 1, true));
         scrollPane.getViewport().setBackground(Color.WHITE);
 
@@ -237,7 +400,7 @@ public class ReportsGUI extends JFrame {
         body.setBorder(new EmptyBorder(8, 8, 8, 8));
         body.add(scrollPane, BorderLayout.CENTER);
 
-        return createCard("Attendee List", body, BOLD, 10);
+        return createCard(title, body, BOLD, 10);
     }
 
     private JPanel createCard(String title, JComponent body, Font titleFont, int headerPadding) {
@@ -257,10 +420,6 @@ public class ReportsGUI extends JFrame {
 
     public JRadioButton getAttendanceRadio() {
         return attendanceRadio;
-    }
-
-    public JRadioButton getFeedbackRadio() {
-        return feedbackRadio;
     }
 
     public JRadioButton getSummaryRadio() {
@@ -301,6 +460,22 @@ public class ReportsGUI extends JFrame {
 
     public DefaultTableModel getTableModel() {
         return tableModel;
+    }
+
+    public JComboBox<String> getAttendanceEventCombo() {
+        return attendanceEventCombo;
+    }
+
+    private static class EventInfo {
+
+        final String id;
+        final String name;
+        int waiting = 0; // size of the waiting list
+
+        EventInfo(String id, String name) {
+            this.id = id;
+            this.name = name;
+        }
     }
 
     private static class StatusRenderer extends DefaultTableCellRenderer {
