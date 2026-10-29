@@ -369,10 +369,8 @@ package GUI;
             } 
             else if (e.getSource() == btnEvents || e.getSource() == cardEvents){
                 setSelectedButton(btnEvents);
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Manage Events"
-                );
+                dispose();
+                new ManageEventGui().setVisible(true);
             } 
             else if(e.getSource() == btnAttendees || e.getSource() == cardAttendees){
                 setSelectedButton(btnAttendees);
