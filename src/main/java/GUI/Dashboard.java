@@ -287,7 +287,7 @@ package GUI;
         }
 
         private ImageIcon resizeIcon(String iconName, int width, int height){
-            java.net.URL iconURL = getClass().getResource("/icons/" + iconName);
+            java.net.URL iconURL = getClass().getResource("/GUIicons/" + iconName);
             if (iconURL == null) {
                 System.out.println("Icon not found: " + iconName);
                 return null;
