@@ -15,13 +15,14 @@ public class WaitingList {
     private PriorityQueue<Attendee> queue;
     private int nextPriority = 1;
 
+    
+    
     public WaitingList() {
         queue = new PriorityQueue<>(
             Comparator.comparingInt(Attendee::getPriority)
         );
     }
 
-    // Add an attendee to the waiting list
     public void addAttendee(String id, String name, String email) {
         Attendee attendee = new Attendee(
             nextPriority++, id, name, email
@@ -30,7 +31,6 @@ public class WaitingList {
         queue.offer(attendee);
     }
 
-    // Return attendees ordered by priority
     public List<Attendee> getWaitingAttendees() {
         PriorityQueue<Attendee> copy = new PriorityQueue<>(queue);
         List<Attendee> attendees = new ArrayList<>();
@@ -42,7 +42,6 @@ public class WaitingList {
         return attendees;
     }
 
-    // Remove the attendee with the highest priority
     public Attendee removeNextAttendee() {
         return queue.poll();
     }
@@ -55,7 +54,6 @@ public class WaitingList {
         return queue.size();
     }
 
-    // Attendee information
     public static class Attendee {
         private int priority;
         private String id;

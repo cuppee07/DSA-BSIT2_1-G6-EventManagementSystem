@@ -2,11 +2,15 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.mycompany.eventmanagementsystem;
+package GUI;
 
 
 import dsa.WaitingList;
+import java.util.HashMap;
+import java.util.Map;
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.*;
@@ -17,35 +21,26 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author Rowena
  */
-public class Registration extends JFrame{   
-    private WaitingList waitingList = new WaitingList();
-    private JComboBox<String> eventBox, eventBox1;
+public class Registration extends JFrame implements ActionListener{   
+    private Map<String, WaitingList> waitingLists = new HashMap<>();    private JComboBox<String> eventBox, eventBox1;
     private JTable table;
     private JTextField  idField, nameField, emailField;
     private DefaultTableModel tableModel;
     private JPanel panel, panel2, panel3, panel4;
-    private JButton registerButton, clearButton;
-    private JLabel resultMessage, resultEvent, resultAttendeeID, resultName;
-// >>> ADDED CODE: Panel 3 capacity labels
-private JLabel capacityEventLabel;
-private JLabel capacityRegisteredLabel;
-private JLabel capacityAvailableLabel;
-
-// >>> ADDED CODE: Store registration counts separately for each event
-private java.util.Map<String, Integer> registeredCounts =
+    private JButton registerButton, clearButton, processButton, backButton;
+    private JLabel resultMessage, resultEvent, resultAttendeeID, resultName, capacityEventLabel, capacityRegisteredLabel, capacityAvailableLabel;
+    private java.util.Map<String, Integer> registeredCounts =
         new java.util.HashMap<>();
 
-// >>> ADDED CODE: Capacity for each event
-private final int EVENT_CAPACITY = 1;
+    private final int EVENT_CAPACITY = 5;
 
-    
- 
-    Color darkBlue = new Color(35, 100, 165);
+    Color blue = new Color(49, 70, 130);
     Color lightBlue = new Color(220, 235, 250);
     Color veryLightBlue = new Color(240, 246, 253);
     Color white = Color.WHITE;
     Color darkText = new Color(35, 55, 80);
-    Color lavender = new Color(230, 230, 250);    
+    Color lavender = new Color(230, 230, 250); 
+    
     
     
     
@@ -58,14 +53,14 @@ private final int EVENT_CAPACITY = 1;
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+           
         
 panel = new JPanel();
 panel.setLayout(null);
 panel.setBorder(BorderFactory.createLineBorder(lightBlue));
-panel.setBounds(20, 20, 450, 265);
+panel.setBounds(20, 10, 450, 265);
 panel.setBackground(veryLightBlue);
 
-// Lavender header
 JPanel header = new JPanel();
 header.setLayout(null);
 header.setBounds(0, 0, 450, 40);
@@ -111,8 +106,10 @@ emailField.setBounds(120, 155, 290, 30);
 registerButton = new JButton("Register");
 registerButton.setBounds(30, 200, 150, 40);
 
+
 clearButton = new JButton("Clear");
 clearButton.setBounds(260, 200, 150, 40);
+
 
 
 panel.add(event);
@@ -129,16 +126,12 @@ panel.add(clearButton);
 add(panel);
 
 
-// PANEL 2
-
-// PANEL 2
-
 panel2 = new JPanel();
 panel2.setLayout(null);
 panel2.setBorder(BorderFactory.createLineBorder(lightBlue));
-panel2.setBounds(490, 150, 470, 135);
+panel2.setBounds(490, 140, 470, 135);
 
-// Lavender header
+
 JPanel header2 = new JPanel();
 header2.setLayout(null);
 header2.setBounds(0, 0, 480, 40);
@@ -152,7 +145,7 @@ title2.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 16));
 header2.add(title2);
 panel2.add(header2);
 
-// Registration result labels
+
         resultMessage = new JLabel("No registration yet.");
         resultMessage.setBounds(25, 50, 390, 30);
 
@@ -174,16 +167,13 @@ panel2.add(header2);
 add(panel2);
         
 
-// PANEL 3
-
 
 panel3 = new JPanel();
 panel3.setLayout(null);
 panel3.setBorder(BorderFactory.createLineBorder(lightBlue));
-panel3.setBounds(490, 20, 470, 120);
+panel3.setBounds(490, 10, 470, 120);
 panel3.setBackground(veryLightBlue);
 
-// Lavender header
 JPanel header3 = new JPanel();
 header3.setLayout(null);
 header3.setBounds(0, 0, 600, 40);
@@ -197,7 +187,6 @@ title3.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 16));
 header3.add(title3);
 panel3.add(header3);
 
-// >>> ADDED CODE: Display event capacity information
 capacityEventLabel = new JLabel("Event: ");
 capacityEventLabel.setBounds(25, 50, 400, 25);
 panel3.add(capacityEventLabel);
@@ -210,46 +199,43 @@ capacityAvailableLabel = new JLabel("Available Slots: 0");
 capacityAvailableLabel.setBounds(320, 85, 400, 25);
 panel3.add(capacityAvailableLabel);
 
-// >>> ADDED CODE: Initialize registration count for each event
-for (int i = 1; i < eventBox.getItemCount(); i++) {
-    registeredCounts.put(eventBox.getItemAt(i), 0);
+for (int i = 0; i < eventBox.getItemCount(); i++) {
+    String eventName = eventBox.getItemAt(i);
+
+    registeredCounts.put(eventName, 0);
+    waitingLists.put(eventName, new WaitingList());
 }
 
-// >>> ADDED CODE: Update Panel 3 when the selected event changes
 eventBox.addActionListener(e -> {
-    String selectedEvent =
-            (String) eventBox.getSelectedItem();
+    String selectedEvent = (String) eventBox.getSelectedItem();
 
-if (selectedEvent == null
-        || selectedEvent.equals("Select Event")) {
+    if (selectedEvent == null) {
+        return;
+    }
 
-    capacityEventLabel.setText("Event: Select Event");
-    capacityRegisteredLabel.setText("Registered Attendees: -");
-    capacityAvailableLabel.setText("Available Slots: - 0");
-
-} else {
     int count = registeredCounts.getOrDefault(selectedEvent, 0);
+    int availableSlots = EVENT_CAPACITY - count;
 
     capacityEventLabel.setText("Event: " + selectedEvent);
-    capacityRegisteredLabel.setText("Registered Attendees: " + count);
-    capacityAvailableLabel.setText(
-        "Available Slots: " + (EVENT_CAPACITY - count)
+    capacityRegisteredLabel.setText(
+        "Registered Attendees: " + count
     );
-}
+    capacityAvailableLabel.setText(
+        "Available Slots: " + availableSlots
+    );
+
+    refreshWaitingListTable();
 });
 
 add(panel3);
 
 
-// PANEL 4
-
 panel4 = new JPanel();
 panel4.setLayout(null);
 panel4.setBorder(BorderFactory.createLineBorder(lightBlue));
-panel4.setBounds(20, 290, 940, 280);
+panel4.setBounds(20, 280, 940, 320);
 panel4.setBackground(white);
 
-// Lavender header
 JPanel header4 = new JPanel();
 header4.setLayout(null);
 header4.setBounds(0, 0, 945, 40);
@@ -260,8 +246,21 @@ title4.setBounds(25, 5, 250, 35);
 title4.setForeground(darkText);
 title4.setFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 16));
 
+processButton = new JButton ("Process Next");     
+processButton.setBounds(742, 280, 180, 30);
+add(processButton); 
+
+backButton = new JButton ("Back");     
+backButton.setBounds(20, 280, 140, 30);
+add(backButton);
+
+
+
 header4.add(title4);
+panel4.add(backButton); 
+panel4.add(processButton); 
 panel4.add(header4);
+
 
 tableModel = new DefaultTableModel();
 
@@ -273,7 +272,43 @@ tableModel = new DefaultTableModel();
         
         table = new JTable(tableModel);
 
-        JScrollPane scrollPane = new JScrollPane(table);
+table.getTableHeader().setPreferredSize(
+    new java.awt.Dimension(900, 30)
+);
+
+table.getTableHeader().setFont(
+    new java.awt.Font("Arial", java.awt.Font.BOLD, 14)
+);
+
+table.setBackground(Color.WHITE);
+table.setForeground(Color.BLACK);
+
+table.setFillsViewportHeight(true);
+table.setOpaque(true);
+
+JScrollPane scrollPane = new JScrollPane(table);
+scrollPane.getViewport().setBackground(Color.WHITE);
+scrollPane.setBackground(Color.WHITE);
+
+scrollPane.getViewport().setBackground(Color.WHITE);
+scrollPane.setBackground(Color.WHITE);
+
+table.setFont(new java.awt.Font("Arial", java.awt.Font.PLAIN, 16));
+
+table.setRowHeight(40);
+
+table.setFillsViewportHeight(true);
+
+table.setBackground(Color.WHITE);
+table.setForeground(Color.BLACK);
+
+table.getTableHeader().setFont(
+    new java.awt.Font("Arial", java.awt.Font.BOLD, 16)
+);
+
+table.getTableHeader().setPreferredSize(
+    new java.awt.Dimension(0, 45)
+);
         scrollPane.setBounds(22, 52, 900, 220);
 
         panel4.add(scrollPane);
@@ -289,9 +324,11 @@ panel2.setBackground(veryLightBlue);
 panel3.setBackground(veryLightBlue);
 panel4.setBackground(veryLightBlue);
 
-registerButton.setBackground(darkBlue);
+registerButton.setBackground(blue);
 registerButton.setForeground(Color.WHITE);
 registerButton.setFocusPainted(false);
+registerButton.setBorderPainted(false);
+registerButton.setContentAreaFilled(true);
     
 eventBox.setBackground(white);
 eventBox.setForeground(darkText);
@@ -299,6 +336,92 @@ eventBox.setForeground(darkText);
 clearButton.setBackground(lavender);
 clearButton.setForeground(darkText);
 clearButton.setFocusPainted(false);
+clearButton.setBorderPainted(false);
+clearButton.setContentAreaFilled(true);
+
+backButton.setBackground(lavender);
+backButton.setForeground(darkText);
+backButton.setFocusPainted(false);
+backButton.setBorderPainted(false);
+backButton.setContentAreaFilled(true);
+
+processButton.setBackground(blue);
+processButton.setForeground(Color.WHITE);
+processButton.setFocusPainted(false);
+processButton.setBorderPainted(false);
+processButton.setContentAreaFilled(true);
+
+
+
+
+
+
+processButton.addActionListener(e -> {
+
+    String selectedEvent = (String) eventBox.getSelectedItem();
+
+    if (selectedEvent == null) {
+        return;
+    }
+
+    WaitingList selectedWaitingList = waitingLists.get(selectedEvent);
+
+    if (selectedWaitingList == null || selectedWaitingList.isEmpty()) {
+        JOptionPane.showMessageDialog(
+            this,
+            "There are no attendees waiting for this event!",
+            "Waiting List",
+            JOptionPane.INFORMATION_MESSAGE
+        );
+        return;
+    }
+
+    int count = registeredCounts.getOrDefault(selectedEvent, 0);
+    int availableSlots = EVENT_CAPACITY - count;
+
+    if (availableSlots <= 0) {
+        JOptionPane.showMessageDialog(
+            this,
+            "The event is full! No available slots.",
+            "Event Full",
+            JOptionPane.WARNING_MESSAGE
+        );
+        return;
+    }
+
+    WaitingList.Attendee nextAttendee =
+        selectedWaitingList.removeNextAttendee();
+
+    if (nextAttendee == null) {
+        return;
+    }
+
+    registeredCounts.put(selectedEvent, count + 1);
+
+    resultMessage.setText("Attendee processed successfully!");
+    resultEvent.setText("Event: " + selectedEvent);
+    resultAttendeeID.setText(
+        "Attendee ID: " + nextAttendee.getId()
+    );
+    resultName.setText("Name: " + nextAttendee.getName());
+
+    refreshWaitingListTable();
+
+    capacityEventLabel.setText("Event: " + selectedEvent);
+    capacityRegisteredLabel.setText(
+        "Registered Attendees: " + (count + 1)
+    );
+    capacityAvailableLabel.setText(
+        "Available Slots: " + (EVENT_CAPACITY - count - 1)
+    );
+
+    JOptionPane.showMessageDialog(
+        this,
+        nextAttendee.getName() + " has been processed successfully!",
+        "Process Next",
+        JOptionPane.INFORMATION_MESSAGE
+    );
+});
 
 
 registerButton.addActionListener(e -> {
@@ -310,7 +433,6 @@ registerButton.addActionListener(e -> {
 
             
            
-            // Check required fields
             if (selectedEvent == null
                     || selectedEvent.trim().isEmpty()
                     || attendeeId.isEmpty()
@@ -325,12 +447,11 @@ registerButton.addActionListener(e -> {
                 );
                 return;
             }
-            // Check if email contains @ and a valid domain format
 if (!attendeeEmail.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
 
     JOptionPane.showMessageDialog(
         this,
-        "Invalid email! Please enter a valid email address with '@'.\n"
+        "Invalid email! Please enter a valid email address"
         + "Example: juan@gmail.com",
         "Invalid Email",
         JOptionPane.WARNING_MESSAGE
@@ -342,11 +463,7 @@ if (!attendeeEmail.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"))
 
             int count = registeredCounts.getOrDefault(selectedEvent, 0);
 
-            // Add the typed information to the Waiting List table
-            // every time a valid registration is submitted.
-            
 
-            // Update registration count if the event has available slots
             if (count < EVENT_CAPACITY) {
 
                 registeredCounts.put(selectedEvent, count + 1);
@@ -365,14 +482,14 @@ if (!attendeeEmail.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"))
 
             } else {
 
-    // Add attendee to the priority queue
-    waitingList.addAttendee(
+    WaitingList selectedWaitingList = waitingLists.get(selectedEvent);
+
+    selectedWaitingList.addAttendee(
         attendeeId,
         attendeeName,
         attendeeEmail
     );
 
-    // Update the Waiting List table
     refreshWaitingListTable();
 
     JOptionPane.showMessageDialog(
@@ -383,38 +500,40 @@ if (!attendeeEmail.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"))
     );
 }
             
-        resultMessage.setText("No Registration yet.");
-        resultEvent.setText("");
-        resultAttendeeID.setText("");
-        resultName.setText("");
-
-
-           
-        capacityEventLabel.setText("");
-        capacityRegisteredLabel.setText("");
-        capacityAvailableLabel.setText("");
         
         
-            // Clear input fields
             idField.setText("");
             nameField.setText("");
             emailField.setText("");
             eventBox.setSelectedIndex(0);
         });
 
-        // CLEAR BUTTON LOGIC
         clearButton.addActionListener(e -> {
             idField.setText("");
             nameField.setText("");
             emailField.setText("");
             eventBox.setSelectedIndex(0);
         });
+           backButton.addActionListener(this);
     }
-    private void refreshWaitingListTable() {
+
+private void refreshWaitingListTable() {
+
     tableModel.setRowCount(0);
 
-    for (WaitingList.Attendee attendee
-            : waitingList.getWaitingAttendees()) {
+    String selectedEvent = (String) eventBox.getSelectedItem();
+
+    if (selectedEvent == null) {
+        return;
+    }
+    WaitingList selectedWaitingList = waitingLists.get(selectedEvent);
+
+    if (selectedWaitingList == null) {
+        return;
+    }
+
+    for (WaitingList.Attendee attendee :
+            selectedWaitingList.getWaitingAttendees()) {
 
         tableModel.addRow(new Object[]{
             attendee.getPriority(),
@@ -425,4 +544,15 @@ if (!attendeeEmail.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"))
     }
 }
 
+ 
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if(e.getSource() == backButton){
+            dispose();
+            Dashboard dashboard = new Dashboard();
+            dashboard.setVisible(true);
+        }
+    }
+
 }
+
