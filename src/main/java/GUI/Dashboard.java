@@ -396,10 +396,8 @@ package GUI;
             }
             else if(e.getSource() == btnReports || e.getSource() == cardReports){
                 setSelectedButton(btnReports);
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Reports"
-                );
+                dispose();
+                new ReportsGUI().setVisible(true);
             }
             else if(e.getSource() == btnLogout) {
                 setSelectedButton(btnLogout);
