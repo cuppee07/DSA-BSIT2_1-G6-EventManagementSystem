@@ -4,6 +4,10 @@
  */
 package GUI;
 
+/**
+ *
+ * @author Carine
+ */
     import java.awt.BorderLayout;
     import java.awt.Color;
     import java.awt.Font;
@@ -372,24 +376,18 @@ package GUI;
             } 
             else if(e.getSource() == btnAttendees || e.getSource() == cardAttendees){
                 setSelectedButton(btnAttendees);
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Manage Attendees"
-                );
+                dispose();
+                new AttendeePanel().setVisible(true);
             } 
             else if(e.getSource() == btnRegistration || e.getSource() == cardRegistration){
                 setSelectedButton(btnRegistration);
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Registration"
-                );
+                dispose();
+                new Registration().setVisible(true);
             } 
             else if(e.getSource() == btnCheckIn || e.getSource() == cardCheckIn){
                 setSelectedButton(btnCheckIn);
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Check-in"
-                );
+                dispose();
+                new CheckInGUI().setVisible(true);
             }
             else if(e.getSource() == btnWaitingList || e.getSource() == cardWaitingList){
                 setSelectedButton(btnWaitingList);

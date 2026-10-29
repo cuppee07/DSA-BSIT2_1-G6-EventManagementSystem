@@ -4,6 +4,10 @@
  */
 package GUI;
 
+/**
+ *
+ * @author Carine
+ */
 import database.DatabaseConnection;
 import javax.swing.*;
 import java.awt.*;
