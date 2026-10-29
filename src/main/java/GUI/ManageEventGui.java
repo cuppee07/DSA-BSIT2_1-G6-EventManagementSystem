@@ -6,11 +6,11 @@
  * manabat is here
  */
 package GUI;
+import service.LinkedList;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
@@ -24,7 +24,7 @@ public class ManageEventGui extends JFrame implements ActionListener{
     private JTable tblEvents;
     private TableRowSorter<DefaultTableModel> sorter;
     private JScrollPane scpEvents;
-     private LinkedList<Object[]> linkedList; 
+    private LinkedList linkedList;
     private DefaultTableModel model; 
     
     private static final String[] categories = {"Select Category", "Technology", "Health", "Arts"};
@@ -227,12 +227,10 @@ UIManager.put("TableHeader.cellBorder", BorderFactory.createMatteBorder(0, 0, 1,
         hdrList.setFont(new Font("Segoe UI", Font.BOLD, 15));
         pnlList.add(hdrList);
  
-         Object[][] rows = {
-     {"E001", "Tech Innovation Summit", "11/15/2026", "Technology", 120},
-    {"E002", "Community Health Fair", "11/22/2026", "Health", 85}
-};
+        linkedList = new LinkedList();
 
-        model = new DefaultTableModel(rows, columns);
+        model = new DefaultTableModel(columns, 0);
+        refreshTable();
         tblEvents = new JTable(model);
         sorter = new TableRowSorter<>(model);
     tblEvents.setRowSorter(sorter);
@@ -258,6 +256,15 @@ UIManager.put("TableHeader.cellBorder", BorderFactory.createMatteBorder(0, 0, 1,
         btnSearch.addActionListener(this);
         btnBack.addActionListener(this);
     }
+
+    // Copies the events from the linked list into the table
+    private void refreshTable() {
+        model.setRowCount(0);
+        for (Object[] row : linkedList.getAllEvents()) {
+            model.addRow(row);
+        }
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {         
         if(e.getSource() == btnAdd){
@@ -267,7 +274,8 @@ UIManager.put("TableHeader.cellBorder", BorderFactory.createMatteBorder(0, 0, 1,
             String category = (String) cmbCategory.getSelectedItem();
 
             if(!id.isEmpty() && !name.isEmpty() && !date.isEmpty() && !date.equals("mm/dd/yyyy") && cmbCategory.getSelectedIndex() != 0){
-                model.addRow(new Object[]{id, name, date, category, 0});
+                linkedList.addEvent(id, name, date, category, 0);
+                refreshTable();
 
                 txtEventId.setText("");
                 txtName.setText("");
@@ -288,10 +296,9 @@ UIManager.put("TableHeader.cellBorder", BorderFactory.createMatteBorder(0, 0, 1,
                 String category = (String) cmbCategory.getSelectedItem();
 
                 if(!id.isEmpty() && !name.isEmpty() && !date.isEmpty() && !date.equals("mm/dd/yyyy") && cmbCategory.getSelectedIndex() != 0){
-                    model.setValueAt(id, indexSelected, 0);
-                    model.setValueAt(name, indexSelected, 1);
-                    model.setValueAt(date, indexSelected, 2);
-                    model.setValueAt(category, indexSelected, 3);
+                    int modelIndex = tblEvents.convertRowIndexToModel(indexSelected);
+                    linkedList.updateEvent(modelIndex, id, name, date, category);
+                    refreshTable();
 
                     txtEventId.setText("");
                     txtName.setText("");
@@ -310,7 +317,9 @@ UIManager.put("TableHeader.cellBorder", BorderFactory.createMatteBorder(0, 0, 1,
             int indexSelected = tblEvents.getSelectedRow();
 
             if(indexSelected != -1){
-                model.removeRow(indexSelected);
+                int modelIndex = tblEvents.convertRowIndexToModel(indexSelected);
+                linkedList.deleteEvent(modelIndex);
+                refreshTable();
 
                 txtEventId.setText("");
                 txtName.setText("");
