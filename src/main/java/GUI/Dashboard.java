@@ -8,23 +8,12 @@ package GUI;
  *
  * @author Carine
  */
-    import java.awt.BorderLayout;
-    import java.awt.Color;
-    import java.awt.Font;
-    import java.awt.GridLayout;
-    import java.awt.Graphics2D;
-    import java.awt.Insets;
-    import java.awt.RenderingHints;
-    import java.awt.image.BufferedImage;
-    import java.awt.event.ActionEvent;
-    import java.awt.event.ActionListener;
+    import java.awt.*;
+    import java.awt.image.*;
+    import java.awt.event.*;
 
     import javax.imageio.ImageIO;
-    import javax.swing.BorderFactory;
-    import javax.swing.ImageIcon;
     import javax.swing.*;
-    import javax.swing.SwingConstants;
-
 
     public class Dashboard extends JFrame implements ActionListener {
         private JPanel sidebar;
@@ -40,7 +29,6 @@ package GUI;
         private JButton btnAttendees;
         private JButton btnRegistration;
         private JButton btnCheckIn;
-        private JButton btnWaitingList;
         private JButton btnReports;
         private JButton btnLogout;
 
@@ -48,7 +36,6 @@ package GUI;
         private JButton cardAttendees;
         private JButton cardRegistration;
         private JButton cardCheckIn;
-        private JButton cardWaitingList;
         private JButton cardReports;
 
         Color NAVY = new Color(41, 54, 80);
@@ -60,7 +47,7 @@ package GUI;
         Color BORDER = new Color(212, 201, 226);
 
         Dashboard() {
-            setTitle("Event Management System");
+            setTitle("EventEase");
             setSize(1000, 600);
             setLocationRelativeTo(null);
             setResizable(false);
@@ -97,21 +84,15 @@ package GUI;
                     "check-in.png",
                     255
             );
-            btnWaitingList = createSideBarButton(
-                    "Waiting List",
-                    "waiting.png",
-                    310
-            );
-
             btnReports = createSideBarButton(
                     "Reports",
                     "reports.png",
-                    365
+                    310
             );
             btnLogout = createSideBarButton(
                     "Logout",
                     "logout.png",
-                    500
+                    450
             );
             
             btnDashboard.setFont(new Font("Arial", Font.BOLD, 14));
@@ -123,7 +104,6 @@ package GUI;
             sidebar.add(btnAttendees);
             sidebar.add(btnRegistration);
             sidebar.add(btnCheckIn);
-            sidebar.add(btnWaitingList);
             sidebar.add(btnReports);
             sidebar.add(btnLogout);
 
@@ -153,7 +133,7 @@ package GUI;
             JPanel contentPanel = new JPanel(new BorderLayout());
             contentPanel.setBackground(Color.WHITE);
             
-            lblWelcome = new JLabel("Welcome, Admin!");
+            lblWelcome = new JLabel("Welcome!");
             lblWelcome.setFont(new Font("Arial", Font.BOLD, 24));
             lblWelcome.setForeground(NAVY);
 
@@ -184,10 +164,6 @@ package GUI;
                     "Check-in",
                     "check-in.png"
             );
-            cardWaitingList = createCardButton(
-                    "Waiting List",
-                    "waiting.png"
-            );
             cardReports = createCardButton(
                     "Reports",
                     "reports.png"
@@ -198,7 +174,6 @@ package GUI;
             cardPanel.add(cardRegistration);
 
             cardPanel.add(cardCheckIn);
-            cardPanel.add(cardWaitingList);
             cardPanel.add(cardReports);
             
             contentPanel.add(titlePanel, BorderLayout.NORTH);
@@ -230,7 +205,6 @@ package GUI;
                 btnAttendees,
                 btnRegistration,
                 btnCheckIn,
-                btnWaitingList,
                 btnReports,
                 btnLogout
             };
@@ -362,10 +336,6 @@ package GUI;
         public void actionPerformed(ActionEvent e) {
             if (e.getSource() == btnDashboard) {
                 setSelectedButton(btnDashboard);
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Dashboard"
-                );
             } 
             else if (e.getSource() == btnEvents || e.getSource() == cardEvents){
                 setSelectedButton(btnEvents);
@@ -387,13 +357,6 @@ package GUI;
                 dispose();
                 new CheckInGUI().setVisible(true);
             }
-            else if(e.getSource() == btnWaitingList || e.getSource() == cardWaitingList){
-                setSelectedButton(btnWaitingList);
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Waiting List"
-                );
-            }
             else if(e.getSource() == btnReports || e.getSource() == cardReports){
                 setSelectedButton(btnReports);
                 dispose();
@@ -405,6 +368,7 @@ package GUI;
                     JOptionPane.showConfirmDialog(this, "Are you sure you want to log out?", "Logout", JOptionPane.YES_NO_OPTION);
                     if (confirm == JOptionPane.YES_OPTION) {
                         dispose();
+                        new Login().setVisible(true);
                     }
             }
         }

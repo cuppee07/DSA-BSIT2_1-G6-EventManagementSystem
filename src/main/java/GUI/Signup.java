@@ -28,6 +28,7 @@ public class Signup extends JFrame implements ActionListener {
     private JCheckBox showPasswordCheckBox;
     private JButton signupButton;
     private JButton loginLinkButton;
+    private Color blue = new Color(49, 70, 130);
 
     public Signup() {
         setTitle("EventEase - Sign Up");
@@ -47,11 +48,11 @@ public class Signup extends JFrame implements ActionListener {
         leftPanel.setBounds(0, 0, 450, 600);
         mainPanel.add(leftPanel);
         
-        int iconWidth = 120;
-        int iconHeight = 120;
+        int iconWidth = 150;
+        int iconHeight = 150;
         
         JLabel iconLabel = new JLabel();
-        iconLabel.setBounds(165, 135, iconWidth, iconHeight);
+        iconLabel.setBounds(150, 110, iconWidth, iconHeight);
         
         URL imgURL = getClass().getResource("/GUIicons/eventplan.png");
         if (imgURL != null) {
@@ -68,19 +69,19 @@ public class Signup extends JFrame implements ActionListener {
         leftPanel.add(iconLabel);
 
         JLabel titleLabel = new JLabel("EventEase", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 30));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 36));
         titleLabel.setForeground(new Color(40, 30, 60));
-        titleLabel.setBounds(100, 275, 250, 40);
+        titleLabel.setBounds(75, 275, 300, 45);
         leftPanel.add(titleLabel);
 
         JLabel subtitleLabel = new JLabel("Plan  •  Register  •  Attend  •  Succeed", SwingConstants.CENTER);
-        subtitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        subtitleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         subtitleLabel.setForeground(new Color(100, 90, 120));
-        subtitleLabel.setBounds(75, 325, 300, 25);
+        subtitleLabel.setBounds(50, 325, 350, 25);
         leftPanel.add(subtitleLabel);
 
         JLabel formTitle = new JLabel("Create an Account");
-        formTitle.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        formTitle.setFont(new Font("Segoe UI", Font.BOLD, 25));
         formTitle.setForeground(new Color(40, 30, 60));
         formTitle.setBounds(500, 45, 250, 30);
         mainPanel.add(formTitle);
@@ -159,10 +160,10 @@ public class Signup extends JFrame implements ActionListener {
         
         signupButton = new JButton("Sign Up");
         signupButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        signupButton.setBackground(new Color(114, 91, 155));
+        signupButton.setBackground(blue);
         signupButton.setForeground(Color.WHITE);
         signupButton.setFocusPainted(false);
-        signupButton.setBounds(500, 360, 330, 40);
+        signupButton.setBounds(500, 370, 330, 40);
         signupButton.addActionListener(this);
         mainPanel.add(signupButton);
 
