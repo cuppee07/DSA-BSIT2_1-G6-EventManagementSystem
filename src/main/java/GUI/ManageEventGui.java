@@ -6,7 +6,7 @@
  * manabat is here!
  */
 package GUI;
-import service.LinkedList;
+import dsa.LinkedList;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
