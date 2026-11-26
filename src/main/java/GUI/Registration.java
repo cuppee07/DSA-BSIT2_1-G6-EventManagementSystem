@@ -34,6 +34,7 @@ public class Registration extends JFrame implements ActionListener{
         new java.util.HashMap<>();
 
     private final int EVENT_CAPACITY = 5;
+    private final String role = null;
 
     Color blue = new Color(49, 70, 130);
     Color lightBlue = new Color(220, 235, 250);
@@ -43,9 +44,12 @@ public class Registration extends JFrame implements ActionListener{
     Color lavender = new Color(230, 230, 250); 
     
     
+    // Default constructor for existing calls
+Registration() {
+    this("ADMIN");
+}
     
-    
-    Registration (){
+    Registration(String role) {
         
         
         setTitle("Event Management System");
@@ -245,9 +249,10 @@ add(panel3);
     processButton.setBounds(742, 280, 180, 30);
     add(processButton); 
 
-    backButton = new JButton ("Back");     
-    backButton.setBounds(20, 280, 140, 30);
-    add(backButton);
+    boolean isAttendee = "ATTENDEE".equalsIgnoreCase(this.role);
+          backButton = new JButton(isAttendee ? "Back to Login" : "Back");
+          backButton.setBounds(20, 280, 150, 30);
+          add(backButton);
 
 
 header4.add(title4);
@@ -535,14 +540,34 @@ private void refreshWaitingListTable() {
 }
 
  
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if(e.getSource() == backButton){
-            dispose();
-            Dashboard dashboard = new Dashboard();
-            dashboard.setVisible(true);
+   @Override
+public void actionPerformed(ActionEvent e) {
+if (e.getSource() == backButton) {
+            boolean isAttendee = "ATTENDEE".equalsIgnoreCase(role);
+
+            String message = isAttendee
+                    ? "Return to login screen? Any unsaved registration details will be lost."
+                    : "Return to Dashboard? Any unsaved registration details will be lost.";
+
+            String title = isAttendee ? "Back to Login" : "Back to Dashboard";
+
+            int choice = JOptionPane.showConfirmDialog(
+                    this,
+                    message,
+                    title,
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            if (choice == JOptionPane.YES_OPTION) {
+                dispose();
+                if (isAttendee) {
+                    new Login().setVisible(true);
+                } else {
+                    new Dashboard().setVisible(true);
+                }
+            }
         }
     }
-
 }
 
