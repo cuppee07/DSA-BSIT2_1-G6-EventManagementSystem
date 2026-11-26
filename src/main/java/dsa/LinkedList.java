@@ -1,0 +1,42 @@
+package dsa;
+
+public class LinkedList {
+    private java.util.LinkedList<Object[]> eventList;
+    private java.util.LinkedList<String> attendeeList;
+
+    public LinkedList() {
+        eventList = new java.util.LinkedList<>();
+        attendeeList = new java.util.LinkedList<>();
+
+        // Initialize with default data
+        eventList.add(new Object[]{"EVT001", "Tech Summit", "11/15/2026", "Technology", 120});
+        eventList.add(new Object[]{"EVT002", "Art Workshop", "11/22/2026", "Arts", 85});
+        eventList.add(new Object[]{"EVT003", "Business Forum", "11/27/2026", "Business", 50});
+    }
+
+    public void addEvent(String id, String name, String date, String category, int attendees) {
+        eventList.add(new Object[]{id, name, date, category, attendees});
+    }
+
+    public void addAttendee(String id, String name, String mail, String event) {
+        attendeeList.add(id + " - " + name + " - " + mail + " - " + event);
+    }
+
+    public void updateEvent(int index, String id, String name, String date, String category) {
+        if (index >= 0 && index < eventList.size()) {
+            Object[] existing = eventList.get(index);
+            Object attendees = existing.length > 4 ? existing[4] : 0;
+            eventList.set(index, new Object[]{id, name, date, category, attendees});
+        }
+    }
+
+    public void deleteEvent(int index) {
+        if (index >= 0 && index < eventList.size()) {
+            eventList.remove(index);
+        }
+    }
+
+    public Object[][] getAllEvents() {
+        return eventList.toArray(new Object[0][0]);
+    }
+}
