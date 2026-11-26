@@ -16,6 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import GUI.CheckInGUI.AttendeeStore;
+import service.AttendeeManager;
 
 
 /** 
@@ -32,9 +33,10 @@ public class Registration extends JFrame implements ActionListener{
     private JLabel resultMessage, resultEvent, resultAttendeeID, resultName, capacityEventLabel, capacityRegisteredLabel, capacityAvailableLabel;
     private java.util.Map<String, Integer> registeredCounts =
         new java.util.HashMap<>();
-
     private final int EVENT_CAPACITY = 5;
-    private final String role = null;
+    private final String role;
+    // Used to check if the attendee exists in the Attendee List
+private AttendeeManager attendeeManager = new AttendeeManager();
 
     Color blue = new Color(49, 70, 130);
     Color lightBlue = new Color(220, 235, 250);
@@ -42,15 +44,16 @@ public class Registration extends JFrame implements ActionListener{
     Color white = Color.WHITE;
     Color darkText = new Color(35, 55, 80);
     Color lavender = new Color(230, 230, 250); 
+
     
     
-    // Default constructor for existing calls
 Registration() {
     this("ADMIN");
 }
     
     Registration(String role) {
         
+        this.role = role; 
         
         setTitle("Event Management System");
         setSize(1000,650);
@@ -456,6 +459,69 @@ registerButton.addActionListener(e -> {
 
     return;
 }
+    boolean attendeeExists = false;
+    boolean detailsMatch = false;
+
+    for (String[] attendee : attendeeManager.getAllAttendees()) {
+
+        if (attendee[0].equalsIgnoreCase(attendeeId)) {
+
+            attendeeExists = true;
+
+            if (attendee[1].equalsIgnoreCase(attendeeName)
+                    && attendee[2].equalsIgnoreCase(attendeeEmail)) {
+
+                detailsMatch = true;
+            }
+
+            break;
+        }
+    }
+
+    // NEW: IF ATTENDEE IS NOT FOUND, ADD TO WAITING LIST
+
+    if (!attendeeExists) {
+
+        WaitingList selectedWaitingList = waitingLists.get(selectedEvent);
+
+        selectedWaitingList.addAttendee(
+            attendeeId,
+            attendeeName,
+            attendeeEmail
+        );
+
+        refreshWaitingListTable();
+
+        JOptionPane.showMessageDialog(
+            this,
+            "Attendee not found in the Attendee List!\n"
+            + "Added to the waiting list.",
+            "Waiting List",
+            JOptionPane.INFORMATION_MESSAGE
+        );
+
+        idField.setText("");
+        nameField.setText("");
+        emailField.setText("");
+        eventBox.setSelectedIndex(0);
+
+        return;
+    }
+
+    // NEW: IF ATTENDEE DETAILS DO NOT MATCH
+
+    if (!detailsMatch) {
+
+        JOptionPane.showMessageDialog(
+            this,
+            "The attendee ID exists, but the name or email does not match!",
+            "Information Mismatch",
+            JOptionPane.WARNING_MESSAGE
+        );
+
+        return;
+    }
+    
 
             int count = registeredCounts.getOrDefault(selectedEvent, 0);
 
