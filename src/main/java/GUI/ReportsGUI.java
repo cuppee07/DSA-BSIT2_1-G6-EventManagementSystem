@@ -2,14 +2,21 @@ package GUI;
 
 //ali
 
+import service.AttendeeManager;
+
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class ReportsGUI extends JFrame {
 
@@ -45,6 +52,7 @@ public class ReportsGUI extends JFrame {
 
     private static final String ATTENDANCE_VIEW = "Attendance Report";
     private static final String SUMMARY_VIEW = "Event Summary";
+    private static final String STATUS_UNAVAILABLE = "Unavailable";
 
     private DefaultTableModel tableModel;      // attendee list
     private JTable table;
@@ -56,8 +64,11 @@ public class ReportsGUI extends JFrame {
     private boolean selectingEvent; // stops the two dropdowns from triggering each other
 
     private JLabel attendeeHeader; // title of the Attendee List card
-    // event ID -> the attendees registered for that event: {ID, Name, Email, Status}
+    // Attendees supplied through the report API and registrations read from the shared database.
     private final Map<String, List<Object[]>> attendeesByEvent = new LinkedHashMap<>();
+    private final Map<String, List<Object[]>> registeredByEvent = new LinkedHashMap<>();
+    private SwingWorker<List<String[]>, Void> attendeeLoad;
+    private final JLabel loadStatus = new JLabel();
 
     private JPanel reportCards;  // switches between the two report views
     private JLabel rightHeader;  // title of the right-side card
@@ -84,6 +95,13 @@ public class ReportsGUI extends JFrame {
         setContentPane(mainPanel);
 
         backBtn.addActionListener(e -> goBack());
+        generateBtn.addActionListener(e -> reloadAttendees());
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowActivated(WindowEvent e) {
+                reloadAttendees();
+            }
+        });
 
         // switch the right side when a report is selected
         attendanceRadio.addActionListener(e -> showReport(ATTENDANCE_VIEW));
@@ -120,6 +138,11 @@ public class ReportsGUI extends JFrame {
         content.add(summaryRadio);
         content.add(Box.createVerticalStrut(30));
         content.add(generateBtn);
+        content.add(Box.createVerticalStrut(10));
+        loadStatus.setFont(NORMAL);
+        loadStatus.setForeground(TEXT);
+        loadStatus.setAlignmentX(Component.LEFT_ALIGNMENT);
+        content.add(loadStatus);
 
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setBackground(Color.WHITE);
@@ -272,6 +295,58 @@ public class ReportsGUI extends JFrame {
         }
     }
 
+    private void reloadAttendees() {
+        if (attendeeLoad != null) {
+            return;
+        }
+        loadStatus.setText("Loading attendees...");
+
+        attendeeLoad = new SwingWorker<List<String[]>, Void>() {
+            @Override
+            protected List<String[]> doInBackground() {
+                List<String[]> attendees = new ArrayList<>();
+                for (String[] attendee : new AttendeeManager().getAllAttendees()) {
+                    attendees.add(attendee);
+                }
+                return attendees;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    loadRegisteredAttendees(get());
+                    loadStatus.setText("");
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    loadStatus.setText("Could not load attendees.");
+                } catch (ExecutionException e) {
+                    loadStatus.setText("Could not load attendees.");
+                } finally {
+                    attendeeLoad = null;
+                }
+            }
+        };
+        attendeeLoad.execute();
+    }
+
+    private void loadRegisteredAttendees(List<String[]> attendees) {
+        Map<String, List<Object[]>> registrations = new LinkedHashMap<>();
+        for (String[] attendee : attendees) {
+            // AttendeePanel passes the full dropdown label to AttendeeManager.
+            String event = attendee[3].trim();
+            int idStart = event.lastIndexOf('(');
+            String eventId = idStart >= 0 && event.endsWith(")")
+                    ? event.substring(idStart + 1, event.length() - 1).trim() : event;
+            eventId = eventId.toUpperCase(Locale.ROOT);
+
+            registrations.computeIfAbsent(eventId, key -> new ArrayList<>())
+                    .add(new Object[]{attendee[0], attendee[1], attendee[2], STATUS_UNAVAILABLE});
+        }
+        registeredByEvent.clear();
+        registeredByEvent.putAll(registrations);
+        refreshSelectedEvent();
+    }
+
     // ================= INPUT (call these to put data in the reports) =================
 
     /** Adds a new event to both dropdowns. */
@@ -327,25 +402,37 @@ public class ReportsGUI extends JFrame {
         selectingEvent = false;
 
         // Attendee List
-        List<Object[]> rows = attendeesByEvent.get(ev.id);
-        int total = 0;
+        Map<String, Object[]> rows = new LinkedHashMap<>();
+        for (Object[] row : attendeesByEvent.get(ev.id)) {
+            rows.put(row[0].toString().toUpperCase(Locale.ROOT), row);
+        }
+        List<Object[]> registrations = registeredByEvent.getOrDefault(
+                ev.id.toUpperCase(Locale.ROOT), Collections.emptyList());
+        for (Object[] row : registrations) {
+            String id = row[0].toString().toUpperCase(Locale.ROOT);
+            Object[] supplied = rows.get(id);
+            rows.put(id, supplied == null ? row : new Object[]{row[0], row[1], row[2], supplied[3]});
+        }
+
         int checkedIn = 0;
+        boolean statusMissing = false;
         tableModel.setRowCount(0);
-        if (rows != null) {
-            for (Object[] row : rows) {
-                tableModel.addRow(row);
-                total++;
-                if ("Checked-in".equals(row[3])) {
-                    checkedIn++;
-                }
+        for (Object[] row : rows.values()) {
+            tableModel.addRow(row);
+            if ("Checked-in".equals(row[3])) {
+                checkedIn++;
+            }
+            if (STATUS_UNAVAILABLE.equals(row[3])) {
+                statusMissing = true;
             }
         }
         attendeeHeader.setText("Attendee List - " + ev.name);
 
-        // Event Summary totals
+        int total = rows.size();
+        String rate = total == 0 ? "0%" : Math.round(100.0 * checkedIn / total) + "%";
         totalRegisteredValue.setText(String.valueOf(total));
-        totalCheckedInValue.setText(String.valueOf(checkedIn));
-        attendanceRateValue.setText(total == 0 ? "0%" : Math.round(100.0 * checkedIn / total) + "%");
+        totalCheckedInValue.setText(statusMissing ? STATUS_UNAVAILABLE : String.valueOf(checkedIn));
+        attendanceRateValue.setText(statusMissing ? STATUS_UNAVAILABLE : rate);
         waitingListValue.setText(String.valueOf(ev.waiting));
     }
 
@@ -487,7 +574,11 @@ public class ReportsGUI extends JFrame {
                     table, value, isSelected, hasFocus, row, column);
             label.setBorder(new EmptyBorder(0, 12, 0, 0));
             if (!isSelected) {
-                label.setForeground("Checked-in".equals(String.valueOf(value)) ? GREEN : RED);
+                if (STATUS_UNAVAILABLE.equals(value)) {
+                    label.setForeground(TEXT);
+                } else {
+                    label.setForeground("Checked-in".equals(value) ? GREEN : RED);
+                }
             }
             return label;
         }
