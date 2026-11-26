@@ -222,6 +222,7 @@ public class Signup extends JFrame implements ActionListener {
                 
                 if (conn == null) {
                     JOptionPane.showMessageDialog(this, "Failed to connect to the database.", "Connection Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
                 
                 pst.setString(1, email);
@@ -231,9 +232,15 @@ public class Signup extends JFrame implements ActionListener {
                 
                 int rowsAffected = pst.executeUpdate();
                 if (rowsAffected > 0) {
-                    JOptionPane.showMessageDialog(this, "Account created successfully! Please log in.");
                     dispose();
-                    new Login().setVisible(true);
+                    if("Attendee".equalsIgnoreCase(role)){
+                        JOptionPane.showMessageDialog(this, "Account created successfully! Please log in.");
+                        new Registration("ATTENDEE").setVisible(true);
+                    }
+                    else{
+                        JOptionPane.showMessageDialog(this, "Account created successfully! Please log in.");
+                        new Login().setVisible(true);
+                    }
                 }
             }
             catch (Exception ex) {

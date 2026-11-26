@@ -173,7 +173,7 @@ public class Login extends JFrame implements ActionListener {
                             new Dashboard().setVisible(true); 
                         } 
                         else { 
-                            new Registration().setVisible(true);
+                            new Registration("ATTENDEE").setVisible(true);
                         }
                     } 
                     else {
