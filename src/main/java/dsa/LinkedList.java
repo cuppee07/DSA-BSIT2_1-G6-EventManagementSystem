@@ -10,6 +10,11 @@ package dsa;
  */
 public class LinkedList {
     private java.util.LinkedList<Object[]> eventList;
+    private java.util.LinkedList<String> attendeeList;
+
+    public LinkedList() {
+        eventList = new java.util.LinkedList<>();
+        attendeeList = new java.util.LinkedList<>();
 
     public LinkedList() {
         eventList = new java.util.LinkedList<>();
@@ -21,6 +26,10 @@ public class LinkedList {
 
     public void addEvent(String id, String name, String date, String category, int attendees) {
         eventList.add(new Object[]{id, name, date, category, attendees});
+    }
+    
+    public void addAttendee(String id, String name, String mail, String event) {
+    attendeeList.add(id + " - " + name + " - " + mail + " - " + event);
     }
 
     public void updateEvent(int index, String id, String name, String date, String category) {
