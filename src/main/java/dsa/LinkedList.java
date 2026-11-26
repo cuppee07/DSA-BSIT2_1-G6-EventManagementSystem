@@ -15,6 +15,9 @@ public class LinkedList {
     public LinkedList() {
         eventList = new java.util.LinkedList<>();
         attendeeList = new java.util.LinkedList<>();
+
+    public LinkedList() {
+        eventList = new java.util.LinkedList<>();
         // Initialize with default data
         eventList.add(new Object[]{"EVT001", "Tech Summit", "11/15/2026", "Technology", 120});
         eventList.add(new Object[]{"EVT002", "Art Workshop", "11/22/2026", "Arts", 85});
