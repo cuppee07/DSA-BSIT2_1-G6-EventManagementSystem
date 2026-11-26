@@ -20,7 +20,7 @@ public class AttendeeManager {
 
     private final String USER = "root";
 
-    private final String PASSWORD = "tisoy062607";
+    private final String PASSWORD = "*Cuppee07*";
 
     // Database connection
     private Connection getConnection() throws SQLException {
