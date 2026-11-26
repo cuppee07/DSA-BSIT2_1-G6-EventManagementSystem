@@ -1,5 +1,13 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package dsa;
 
+/**
+ *
+ * @author Asus TUF
+ */
 public class LinkedList {
     private java.util.LinkedList<Object[]> eventList;
     private java.util.LinkedList<String> attendeeList;
@@ -7,7 +15,6 @@ public class LinkedList {
     public LinkedList() {
         eventList = new java.util.LinkedList<>();
         attendeeList = new java.util.LinkedList<>();
-
         // Initialize with default data
         eventList.add(new Object[]{"EVT001", "Tech Summit", "11/15/2026", "Technology", 120});
         eventList.add(new Object[]{"EVT002", "Art Workshop", "11/22/2026", "Arts", 85});
@@ -17,15 +24,15 @@ public class LinkedList {
     public void addEvent(String id, String name, String date, String category, int attendees) {
         eventList.add(new Object[]{id, name, date, category, attendees});
     }
-
+    
     public void addAttendee(String id, String name, String mail, String event) {
-        attendeeList.add(id + " - " + name + " - " + mail + " - " + event);
+    attendeeList.add(id + " - " + name + " - " + mail + " - " + event);
     }
 
     public void updateEvent(int index, String id, String name, String date, String category) {
         if (index >= 0 && index < eventList.size()) {
             Object[] existing = eventList.get(index);
-            Object attendees = existing.length > 4 ? existing[4] : 0;
+            Object attendees = existing.length > 4 ? existing[4] : 0; // Preserve attendees count
             eventList.set(index, new Object[]{id, name, date, category, attendees});
         }
     }
