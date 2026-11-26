@@ -23,7 +23,7 @@ public class RegistrationService {
 
     private final String USER = "root";
 
-    private final String PASSWORD = "lwarrent687_";
+    private final String PASSWORD = "*Cuppee07*";
     
     
      public static class RegistrationRecord {
