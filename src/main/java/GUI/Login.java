@@ -121,6 +121,8 @@ public class Login extends JFrame implements ActionListener {
 
         loginButton = new JButton("Login");
         loginButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        loginButton.setOpaque(true);
+        loginButton.setContentAreaFilled(true);
         loginButton.setBackground(blue);
         loginButton.setForeground(Color.WHITE);
         loginButton.setFocusPainted(false);
@@ -131,6 +133,7 @@ public class Login extends JFrame implements ActionListener {
         signupLinkButton = new JButton("<html>Don't have an account? <b>Sign up</b></html>");
         signupLinkButton.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         signupLinkButton.setBorderPainted(false);
+        signupLinkButton.setOpaque(true);
         signupLinkButton.setContentAreaFilled(false);
         signupLinkButton.setFocusPainted(false);
         signupLinkButton.setForeground(new Color(114, 91, 155));
