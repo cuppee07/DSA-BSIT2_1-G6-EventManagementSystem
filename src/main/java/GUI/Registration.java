@@ -18,15 +18,7 @@ import javax.swing.table.DefaultTableModel;
 import GUI.CheckInGUI.AttendeeStore;
 import service.AttendeeManager;
 import GUI.CheckInGUI.Attendee;
-
-
-
-
-
-
-
-
-
+import service.EventManager;
 
 
 /** 
@@ -47,6 +39,8 @@ public class Registration extends JFrame implements ActionListener{
     private final String role;
     // Used to check if the attendee exists in the Attendee List
 private AttendeeManager attendeeManager = new AttendeeManager();
+// Connect to the Events database
+private EventManager eventManager = new EventManager();
 
     Color blue = new Color(49, 70, 130);
     Color lightBlue = new Color(220, 235, 250);
@@ -96,10 +90,10 @@ Registration() {
     event.setBounds(30, 50, 100, 30);
 
 
-    eventBox = new JComboBox();
-    eventBox.addItem("Tech Summit (EVT001)");
-    eventBox.addItem("Art Workshop (EVT002)");
-    eventBox.addItem("Business Forum (EVT003)");
+    // Load events directly from the database
+eventBox = new JComboBox<>();
+
+loadEventsIntoComboBox();
 
     eventBox.setBounds(120, 50, 290, 30);
 
@@ -219,7 +213,7 @@ for (int i = 0; i < eventBox.getItemCount(); i++) {
     // ADDED: Only initialize if this event has no saved count
     registeredCounts.putIfAbsent(eventName, 0);
 
-    waitingLists.put(eventName, new WaitingList());
+    waitingLists.putIfAbsent(eventName, new WaitingList());
 }
     eventBox.addActionListener(e -> {
     String selectedEvent = (String) eventBox.getSelectedItem();
@@ -655,6 +649,34 @@ private void refreshWaitingListTable() {
     }
 }
 
+// Load all events from the Events database table
+private void loadEventsIntoComboBox() {
+
+    // Clear existing combo box items
+    eventBox.removeAllItems();
+
+    // Retrieve all events from EventManager
+    for (String[] event : eventManager.getAllEvents()) {
+
+        String eventId = event[0];
+        String eventName = event[1];
+
+        // Display format: Event Name (Event ID)
+        String displayEvent = eventName + " (" + eventId + ")";
+
+        // Add event to the combo box
+        eventBox.addItem(displayEvent);
+
+        // Initialize waiting list and registration count
+        registeredCounts.putIfAbsent(displayEvent, 0);
+        waitingLists.putIfAbsent(displayEvent, new WaitingList());
+    }
+
+    // Select the first event automatically
+    if (eventBox.getItemCount() > 0) {
+        eventBox.setSelectedIndex(0);
+    }
+}
  
    @Override
 public void actionPerformed(ActionEvent e) {
