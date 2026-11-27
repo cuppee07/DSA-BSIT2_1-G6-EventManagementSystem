@@ -17,6 +17,16 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import GUI.CheckInGUI.AttendeeStore;
 import service.AttendeeManager;
+import GUI.CheckInGUI.Attendee;
+
+
+
+
+
+
+
+
+
 
 
 /** 
@@ -31,8 +41,8 @@ public class Registration extends JFrame implements ActionListener{
     private JPanel panel, panel2, panel3, panel4;
     private JButton registerButton, clearButton, processButton, backButton;
     private JLabel resultMessage, resultEvent, resultAttendeeID, resultName, capacityEventLabel, capacityRegisteredLabel, capacityAvailableLabel;
-    private java.util.Map<String, Integer> registeredCounts =
-        new java.util.HashMap<>();
+    private static final Map<String, Integer> registeredCounts =
+        new HashMap<>();
     private final int EVENT_CAPACITY = 5;
     private final String role;
     // Used to check if the attendee exists in the Attendee List
@@ -206,7 +216,9 @@ panel3.add(header3);
 for (int i = 0; i < eventBox.getItemCount(); i++) {
     String eventName = eventBox.getItemAt(i);
 
-    registeredCounts.put(eventName, 0);
+    // ADDED: Only initialize if this event has no saved count
+    registeredCounts.putIfAbsent(eventName, 0);
+
     waitingLists.put(eventName, new WaitingList());
 }
     eventBox.addActionListener(e -> {
@@ -521,6 +533,44 @@ registerButton.addActionListener(e -> {
 
         return;
     }
+    
+    
+    // ADDED: Prevent duplicate attendee names and IDs
+boolean duplicateID = false;
+boolean duplicateName = false;
+
+for (Attendee existing : AttendeeStore.getInstance().getAll()) {
+
+    if (existing.getId().trim().equalsIgnoreCase(attendeeId)) {
+        duplicateID = true;
+    }
+
+    if (existing.getName().trim().equalsIgnoreCase(attendeeName)) {
+        duplicateName = true;
+    }
+}
+
+if (duplicateID || duplicateName) {
+
+    String message = "";
+
+    if (duplicateID) {
+        message += "This Attendee ID is already registered!\n";
+    }
+
+    if (duplicateName) {
+        message += "This name is already registered!";
+    }
+
+    JOptionPane.showMessageDialog(
+        this,
+        message,
+        "Duplicate Information",
+        JOptionPane.WARNING_MESSAGE
+    );
+
+    return;
+}
     
 
             int count = registeredCounts.getOrDefault(selectedEvent, 0);
