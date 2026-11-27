@@ -1,0 +1,641 @@
+
+package GUI;
+
+import dsa.SearchAlgorithm;
+import service.AttendeeManager;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.LinkedList;
+
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
+
+public class AttendeePanel extends JFrame implements ActionListener {
+
+    private DefaultListModel<String> listModel;
+    private LinkedList<String> linkedlist;
+    private JList<String> list;
+    private JScrollPane scrollpane;
+
+    private JTextField txtfield, txtid, txtname, txtmail, txtsearch;
+
+    private JPanel ad, sa, al;
+
+    private JLabel lblid, lblmail, lblevent, lblname;
+    private JLabel lblby, lblad, lblsa, lblal;
+
+    private TitledBorder titleB;
+
+    private JButton btnadd, btnupdt, btndlt;
+    private JButton btnclr, btnsrch, btnbck;
+
+    private JComboBox<String> cbevnt, cbby;
+
+    private DefaultTableModel listTable;
+    private JTable attendeeTable;
+
+    private AttendeeManager attendeeManager;
+
+    private Color blue = new Color(49, 70, 130);
+    private Color purple = new Color(105, 103, 175);
+    private Color lightPurple = new Color(231, 229, 250);
+    private Color white = Color.WHITE;
+    private Color background = new Color(248, 249, 255);
+    private Color tableGray = new Color(242, 242, 242);
+    private Color headerGray = new Color(230, 230, 230);
+    private Color gridGray = new Color(217, 217, 217);
+    private Color lightGray = new Color(245, 245, 245);
+
+
+    // CONSTRUCTOR
+    AttendeePanel() {
+
+        attendeeManager = new AttendeeManager();
+
+        linkedlist = new LinkedList<>();
+        listModel = new DefaultListModel<>();
+
+        setTitle("Event Management System");
+        setSize(1000, 650);
+        setLayout(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        getContentPane().setBackground(background);
+
+
+        // ATTENDEE DETAILS
+
+        ad = new JPanel();
+        ad.setBounds(30, 30, 550, 260);
+        ad.setBorder(BorderFactory.createLineBorder(lightPurple, 2));
+        ad.setLayout(null);
+        ad.setBackground(white);
+        add(ad);
+
+        lblad = new JLabel("Attendee Details");
+        lblad.setBounds(0, 0, 550, 40);
+        lblad.setOpaque(true);
+        lblad.setBackground(lightPurple);
+        lblad.setForeground(blue);
+        lblad.setBorder(
+                BorderFactory.createEmptyBorder(0, 10, 0, 0));
+        ad.add(lblad);
+
+
+        lblid = new JLabel("ID:");
+        lblid.setBounds(20, 50, 70, 30);
+        ad.add(lblid);
+
+        txtid = new JTextField();
+        txtid.setBounds(85, 50, 425, 30);
+        ad.add(txtid);
+
+
+        lblname = new JLabel("Name:");
+        lblname.setBounds(20, 90, 70, 30);
+        ad.add(lblname);
+
+        txtname = new JTextField();
+        txtname.setBounds(85, 90, 425, 30);
+        ad.add(txtname);
+
+
+        lblmail = new JLabel("Email:");
+        lblmail.setBounds(20, 130, 70, 30);
+        ad.add(lblmail);
+
+        txtmail = new JTextField();
+        txtmail.setBounds(85, 130, 425, 30);
+        ad.add(txtmail);
+
+
+        lblevent = new JLabel("Event:");
+        lblevent.setBounds(20, 170, 70, 30);
+        ad.add(lblevent);
+
+        cbevnt = new JComboBox<>();
+        cbevnt.setBounds(85, 170, 425, 30);
+
+        cbevnt.addItem("Select Event");
+        cbevnt.addItem("Tech Summit (EVT001)");
+        cbevnt.addItem("Art Workshop (EVT002)");
+        cbevnt.addItem("Business Forum (EVT003)");
+
+        ad.add(cbevnt);
+
+
+        // ADD BUTTON
+
+        btnadd = new JButton("Add");
+        btnadd.setBounds(20, 210, 100, 40);
+        btnadd.setBackground(blue);
+        btnadd.setForeground(white);
+        btnadd.setOpaque(true);
+        btnadd.setContentAreaFilled(true);
+        btnadd.setBorderPainted(false);
+        btnadd.setFocusable(false);
+        ad.add(btnadd);
+
+
+        // UPDATE BUTTON
+
+        btnupdt = new JButton("Update");
+        btnupdt.setBounds(150, 210, 100, 40);
+        btnupdt.setBackground(lightPurple);
+        btnupdt.setForeground(blue);
+        btnupdt.setOpaque(true);
+        btnupdt.setContentAreaFilled(true);
+        btnupdt.setBorderPainted(false);
+        btnupdt.setFocusable(false);
+        ad.add(btnupdt);
+
+
+        // DELETE BUTTON
+
+        btndlt = new JButton("Delete");
+        btndlt.setBounds(280, 210, 100, 40);
+        btndlt.setBackground(lightPurple);
+        btndlt.setForeground(blue);
+        btndlt.setOpaque(true);
+        btndlt.setContentAreaFilled(true);
+        btndlt.setBorderPainted(false);
+        btndlt.setFocusable(false);
+        ad.add(btndlt);
+
+
+        // CLEAR BUTTON
+
+        btnclr = new JButton("Clear");
+        btnclr.setBounds(410, 210, 100, 40);
+        btnclr.setBackground(lightPurple);
+        btnclr.setForeground(blue);
+        btnclr.setOpaque(true);
+        btnclr.setContentAreaFilled(true);
+        btnclr.setBorderPainted(false);
+        btnclr.setFocusable(false);
+        ad.add(btnclr);
+
+
+        // SEARCH ATTENDEE
+
+        sa = new JPanel();
+        sa.setBounds(610, 30, 350, 260);
+        sa.setBorder(BorderFactory.createLineBorder(lightPurple, 2));
+        sa.setBackground(white);
+        sa.setLayout(null);
+        add(sa);
+
+        lblsa = new JLabel("Search Attendee");
+        lblsa.setBounds(0, 0, 350, 40);
+        lblsa.setOpaque(true);
+        lblsa.setBackground(lightPurple);
+        lblsa.setForeground(blue);
+        lblsa.setBorder(
+                BorderFactory.createEmptyBorder(0, 10, 0, 0));
+        sa.add(lblsa);
+
+
+        lblby = new JLabel("By:");
+        lblby.setBounds(20, 50, 50, 30);
+        sa.add(lblby);
+
+        cbby = new JComboBox<>();
+        cbby.setBounds(85, 50, 250, 30);
+
+        cbby.addItem("Name");
+        cbby.addItem("ID");
+        cbby.addItem("Email");
+
+        sa.add(cbby);
+
+
+        txtsearch = new JTextField("");
+        txtsearch.setBounds(85, 90, 250, 30);
+        sa.add(txtsearch);
+
+
+        btnsrch = new JButton("Search");
+        btnsrch.setBounds(85, 130, 200, 40);
+        btnsrch.setBackground(blue);
+        btnsrch.setForeground(white);
+        btnsrch.setOpaque(true);
+        btnsrch.setContentAreaFilled(true);
+        btnsrch.setBorderPainted(false);
+        btnsrch.setFocusable(false);
+        sa.add(btnsrch);
+
+
+        // ATTENDEE TABLE
+
+        al = new JPanel();
+        al.setBounds(30, 300, 930, 230);
+        al.setBorder(BorderFactory.createLineBorder(lightPurple, 2));
+        al.setLayout(null);
+        al.setBackground(white);
+        add(al);
+
+        lblal = new JLabel("Attendee List");
+        lblal.setBounds(0, 0, 930, 40);
+        lblal.setOpaque(true);
+        lblal.setBackground(headerGray);
+        lblal.setForeground(blue);
+        lblal.setBorder(
+                BorderFactory.createEmptyBorder(0, 10, 0, 0));
+        al.add(lblal);
+
+
+        String[] columns = {"ID", "Name", "Email", "Event ID"};
+
+        listTable = new DefaultTableModel(columns, 0) {
+
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        attendeeTable = new JTable(listTable);
+
+
+        // TABLE DESIGN
+
+        attendeeTable.setBackground(Color.WHITE);
+        attendeeTable.setForeground(Color.BLACK);
+        attendeeTable.setFont(new Font("Arial", Font.PLAIN, 14));
+        attendeeTable.setRowHeight(42);
+        attendeeTable.setGridColor(new Color(217, 217, 217));
+        attendeeTable.setShowGrid(true);
+        attendeeTable.setIntercellSpacing(
+                new java.awt.Dimension(1, 1));
+
+        attendeeTable.getTableHeader().setBackground(
+                new Color(245, 245, 245));
+
+        attendeeTable.getTableHeader().setForeground(
+                new Color(80, 80, 80));
+
+        attendeeTable.getTableHeader().setFont(
+                new Font("Arial", Font.BOLD, 14));
+
+        attendeeTable.getTableHeader().setPreferredSize(
+                new java.awt.Dimension(0, 40));
+
+        attendeeTable.getTableHeader().setOpaque(true);
+
+        attendeeTable.setSelectionBackground(
+                new Color(231, 229, 250));
+
+        attendeeTable.setSelectionForeground(Color.BLACK);
+
+        attendeeTable.setDefaultRenderer(
+                Object.class,
+                new javax.swing.table.DefaultTableCellRenderer()
+        );
+
+        attendeeTable.setFocusable(false);
+
+
+        scrollpane = new JScrollPane(attendeeTable);
+        scrollpane.setBounds(20, 50, 870, 150);
+        scrollpane.getViewport().setBackground(Color.WHITE);
+        scrollpane.setBorder(BorderFactory.createEmptyBorder());
+        al.add(scrollpane);
+
+
+        // AUTOMATICALLY FILL FIELDS WHEN ROW IS SELECTED
+
+        attendeeTable.getSelectionModel().addListSelectionListener(e -> {
+
+            if (!e.getValueIsAdjusting()) {
+
+                int row = attendeeTable.getSelectedRow();
+
+                if (row != -1) {
+
+                    txtid.setText(
+                            listTable.getValueAt(row, 0).toString());
+
+                    txtname.setText(
+                            listTable.getValueAt(row, 1).toString());
+
+                    txtmail.setText(
+                            listTable.getValueAt(row, 2).toString());
+
+                    cbevnt.setSelectedItem(
+                            listTable.getValueAt(row, 3).toString());
+                }
+            }
+        });
+
+
+        // BACK BUTTON
+
+        btnbck = new JButton("Back");
+        btnbck.setBounds(30, 540, 100, 40);
+        btnbck.setBackground(lightPurple);
+        btnbck.setForeground(blue);
+        btnbck.setOpaque(true);
+        btnbck.setContentAreaFilled(true);
+        btnbck.setBorderPainted(false);
+        btnbck.setFocusable(false);
+        add(btnbck);
+
+
+        // BUTTON ACTION LISTENERS
+
+        btnadd.addActionListener(this);
+        btnupdt.addActionListener(this);
+        btndlt.addActionListener(this);
+        btnclr.addActionListener(this);
+        btnsrch.addActionListener(this);
+        btnbck.addActionListener(this);
+
+
+        // LOAD DATABASE RECORDS
+
+        loadAttendees();
+
+        setLocationRelativeTo(null);
+    }
+
+
+    
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+
+        
+
+        if (e.getSource() == btnadd) {
+
+            String id = txtid.getText().trim();
+            String name = txtname.getText().trim();
+            String mail = txtmail.getText().trim();
+            String event = cbevnt.getSelectedItem().toString();
+
+            if (id.isEmpty() || name.isEmpty() || mail.isEmpty()
+                    || event.equals("Select Event")) {
+
+                JOptionPane.showMessageDialog(this,
+                        "Please complete all the fields.");
+
+            } else if (!mail.matches(
+                    "^[A-Za-z0-9._%+-]+@gmail\\.com$")) {
+
+                JOptionPane.showMessageDialog(this,
+                        "Please enter a valid Email address (example@gmail.com).");
+
+            } else {
+
+                boolean duplicate = false;
+
+                for (int i = 0; i < listTable.getRowCount(); i++) {
+
+                    if (listTable.getValueAt(i, 0).toString()
+                            .equalsIgnoreCase(id)) {
+
+                        duplicate = true;
+                        break;
+                    }
+                }
+
+                if (duplicate) {
+
+                    JOptionPane.showMessageDialog(this,
+                            "This ID already exists.");
+
+                } else {
+
+                    boolean saved = attendeeManager.addAttendee(
+                            id, name, mail, event);
+
+                    if (saved) {
+
+                        loadAttendees();
+
+                        JOptionPane.showMessageDialog(this,
+                                "Added successfully!");
+
+                        clearFields();
+
+                    } else {
+
+                        JOptionPane.showMessageDialog(this,
+                                "Unable to save attendee to database. "
+                                + "Check your database connection or ID.");
+                    }
+                }
+            }
+        }
+
+
+        
+
+        else if (e.getSource() == btnupdt) {
+
+            int row = attendeeTable.getSelectedRow();
+
+            if (row == -1) {
+
+                JOptionPane.showMessageDialog(this,
+                        "Please select an attendee to update.");
+
+            } else {
+
+                String oldId = listTable.getValueAt(row, 0).toString();
+
+                String id = txtid.getText().trim();
+                String name = txtname.getText().trim();
+                String mail = txtmail.getText().trim();
+                String event = cbevnt.getSelectedItem().toString();
+
+                if (id.isEmpty() || name.isEmpty() || mail.isEmpty()
+                        || event.equals("Select Event")) {
+
+                    JOptionPane.showMessageDialog(this,
+                            "Please complete all the fields.");
+
+                } else if (!mail.matches(
+                        "^[A-Za-z0-9._%+-]+@gmail\\.com$")) {
+
+                    JOptionPane.showMessageDialog(this,
+                            "Please enter a valid Email address.");
+
+                } else {
+
+                    
+
+                    boolean duplicate = false;
+
+                    for (int i = 0; i < listTable.getRowCount(); i++) {
+
+                        if (i != row
+                                && listTable.getValueAt(i, 0).toString()
+                                        .equalsIgnoreCase(id)) {
+
+                            duplicate = true;
+                            break;
+                        }
+                    }
+
+                    if (duplicate) {
+
+                        JOptionPane.showMessageDialog(this,
+                                "This ID already belongs to another attendee.");
+
+                    } else {
+
+                        boolean updated = attendeeManager.updateAttendee(
+                                oldId, id, name, mail, event);
+
+                        if (updated) {
+
+                            loadAttendees();
+
+                            JOptionPane.showMessageDialog(this,
+                                    "Updated successfully!");
+
+                            clearFields();
+                            attendeeTable.clearSelection();
+
+                        } else {
+
+                            JOptionPane.showMessageDialog(this,
+                                    "Unable to update attendee. "
+                                    + "Check the database connection.");
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+        else if (e.getSource() == btndlt) {
+
+            int row = attendeeTable.getSelectedRow();
+
+            if (row == -1) {
+
+                JOptionPane.showMessageDialog(this,
+                        "Select an attendee to delete.");
+
+            } else {
+
+                String id = listTable.getValueAt(row, 0).toString();
+
+                int confirm = JOptionPane.showConfirmDialog(
+                        this,
+                        "Are you sure you want to delete attendee?",
+                        "Confirm Delete",
+                        JOptionPane.YES_NO_OPTION);
+
+                if (confirm == JOptionPane.YES_OPTION) {
+
+                    boolean deleted = attendeeManager.deleteAttendee(id);
+
+                    if (deleted) {
+
+                        loadAttendees();
+
+                        JOptionPane.showMessageDialog(this,
+                                "Attendee deleted successfully.");
+
+                        clearFields();
+                        attendeeTable.clearSelection();
+
+                    } else {
+
+                        JOptionPane.showMessageDialog(this,
+                                "Unable to delete attendee. "
+                                + "Check the database connection.");
+                    }
+                }
+            }
+        }
+
+
+
+        else if (e.getSource() == btnclr) {
+
+            clearFields();
+            attendeeTable.clearSelection();
+        }
+
+
+        
+
+        else if (e.getSource() == btnsrch) {
+
+            String search = txtsearch.getText().trim();
+            String searchBy = cbby.getSelectedItem().toString();
+
+            if (search.isEmpty()) {
+
+                JOptionPane.showMessageDialog(this,
+                        "Please enter a name, ID, or email to search.");
+
+            } else {
+
+                String result = SearchAlgorithm.searchAttendee(
+                        listTable, search, searchBy);
+
+                if (result != null) {
+
+                    JOptionPane.showMessageDialog(this,
+                            result + " is here!");
+
+                } else {
+
+                    JOptionPane.showMessageDialog(this,
+                            "Attendee not found.");
+                }
+            }
+        }
+
+
+        
+
+        else if (e.getSource() == btnbck) {
+
+            dispose();
+            new Dashboard().setVisible(true);
+        }
+    }
+
+
+    
+    private void loadAttendees() {
+
+        listTable.setRowCount(0);
+        linkedlist.clear();
+
+        for (String[] attendee : attendeeManager.getAllAttendees()) {
+
+            listTable.addRow(attendee);
+
+            linkedlist.add(
+                    attendee[0] + " - "
+                    + attendee[1] + " - "
+                    + attendee[2] + " - "
+                    + attendee[3]
+            );
+        }
+    }
+
+
+    
+
+    private void clearFields() {
+
+        txtid.setText("");
+        txtname.setText("");
+        txtmail.setText("");
+        cbevnt.setSelectedIndex(0);
+        txtsearch.setText("");
+    }
+}
