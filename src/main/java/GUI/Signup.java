@@ -160,6 +160,8 @@ public class Signup extends JFrame implements ActionListener {
         
         signupButton = new JButton("Sign Up");
         signupButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        signupButton.setOpaque(true);
+        signupButton.setContentAreaFilled(true);
         signupButton.setBackground(blue);
         signupButton.setForeground(Color.WHITE);
         signupButton.setFocusPainted(false);
@@ -170,6 +172,7 @@ public class Signup extends JFrame implements ActionListener {
         loginLinkButton = new JButton("<html>Already have an account? <b>Log in</b></html>");
         loginLinkButton.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         loginLinkButton.setBorderPainted(false);
+        loginLinkButton.setOpaque(true);
         loginLinkButton.setContentAreaFilled(false);
         loginLinkButton.setFocusPainted(false);
         loginLinkButton.setForeground(new Color(114, 91, 155));
