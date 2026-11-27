@@ -6,7 +6,9 @@
  * manabat is here!
  */
 package GUI;
-import dsa.LinkedList;
+import service.EventManager;
+import dsa.SearchAlgorithm;
+import java.util.List;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -24,12 +26,13 @@ public class ManageEventGui extends JFrame implements ActionListener{
     private JTable tblEvents;
     private TableRowSorter<DefaultTableModel> sorter;
     private JScrollPane scpEvents;
-    private LinkedList linkedList;
+    private EventManager eventManager;
     private DefaultTableModel model; 
     
     private static final String[] categories = {"Select Category", "Technology", "Business", "Arts"};
     private static final String[] searchOptions = {"Date", "Category", "Event ID"};
     private static final String[] columns = {"Event ID", "Name", "Date", "Category", "Attendees"};
+    private static final int DEFAULT_ATTENDEES = 5; 
  
     private Color color1 = new Color(72, 88, 150);// add and search button
     private Color color2 = new Color(224, 225, 250);// header bars and lighter buttons
@@ -53,7 +56,7 @@ public class ManageEventGui extends JFrame implements ActionListener{
         UIManager.put("Table.font", fntPlain);
         UIManager.put("TableHeader.font", fntBold);
         UIManager.put("Button.font", fntBold);
-UIManager.put("TableHeader.cellBorder", BorderFactory.createMatteBorder(0, 0, 1, 1, Color.LIGHT_GRAY));
+        UIManager.put("TableHeader.cellBorder", BorderFactory.createMatteBorder(0, 0, 1, 1, Color.LIGHT_GRAY));
         setTitle("Event Management System");
         setSize(1000, 650);
         setLayout(null);
@@ -227,7 +230,11 @@ UIManager.put("TableHeader.cellBorder", BorderFactory.createMatteBorder(0, 0, 1,
         hdrList.setFont(new Font("Segoe UI", Font.BOLD, 15));
         pnlList.add(hdrList);
  
-        linkedList = new LinkedList();
+        eventManager = new EventManager();
+        eventManager.addEvent("EVT001", "Tech Summit",    "11/13/2026", "Technology", 5);
+        eventManager.addEvent("EVT002", "Art Workshop",   "11/22/2026", "Arts",        5);
+        eventManager.addEvent("EVT003", "Business Forum", "11/27/2026", "Business",    5);
+        
 
         model = new DefaultTableModel(columns, 0);
         refreshTable();
@@ -243,9 +250,12 @@ UIManager.put("TableHeader.cellBorder", BorderFactory.createMatteBorder(0, 0, 1,
         tblEvents.getTableHeader().setResizingAllowed(false);
  
                 scpEvents = new JScrollPane(tblEvents);
+                scpEvents.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+            scpEvents.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scpEvents.setBorder(BorderFactory.createMatteBorder(1, 1, 0, 0, Color.LIGHT_GRAY));
-        scpEvents.setBounds(15, 55, 922, 170);
+        scpEvents.setBounds(15, 55, 922, 120);
         scpEvents.getViewport().setBackground(Color.WHITE);
+        scpEvents.getVerticalScrollBar().setPreferredSize(new java.awt.Dimension(0, 0));
         pnlList.add(scpEvents);
         
         
@@ -257,10 +267,10 @@ UIManager.put("TableHeader.cellBorder", BorderFactory.createMatteBorder(0, 0, 1,
         btnBack.addActionListener(this);
     }
 
-    // Copies the events from the linked list into the table
+    // Copies the events from the database into the table
     private void refreshTable() {
         model.setRowCount(0);
-        for (Object[] row : linkedList.getAllEvents()) {
+        for (String[] row : eventManager.getAllEvents()) {
             model.addRow(row);
         }
     }
@@ -274,14 +284,17 @@ UIManager.put("TableHeader.cellBorder", BorderFactory.createMatteBorder(0, 0, 1,
             String category = (String) cmbCategory.getSelectedItem();
 
             if(!id.isEmpty() && !name.isEmpty() && !date.isEmpty() && !date.equals("mm/dd/yyyy") && cmbCategory.getSelectedIndex() != 0){
-                linkedList.addEvent(id, name, date, category, 0);
-                refreshTable();
+                if(eventManager.addEvent(id, name, date, category, DEFAULT_ATTENDEES)){
+                    refreshTable();
 
-                txtEventId.setText("");
-                txtName.setText("");
-                txtDate.setText("mm/dd/yyyy");
-                txtDate.setForeground(Color.GRAY);
-                cmbCategory.setSelectedIndex(0);
+                    txtEventId.setText("");
+                    txtName.setText("");
+                    txtDate.setText("mm/dd/yyyy");
+                    txtDate.setForeground(Color.GRAY);
+                    cmbCategory.setSelectedIndex(0);
+                }else{
+                    JOptionPane.showMessageDialog(this, "Failed to add event (Event ID may already exist)", "Database Error", JOptionPane.ERROR_MESSAGE);
+                }
             }else{
                 JOptionPane.showMessageDialog(this, "Please fill in all fields", "Input Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -297,15 +310,20 @@ UIManager.put("TableHeader.cellBorder", BorderFactory.createMatteBorder(0, 0, 1,
 
                 if(!id.isEmpty() && !name.isEmpty() && !date.isEmpty() && !date.equals("mm/dd/yyyy") && cmbCategory.getSelectedIndex() != 0){
                     int modelIndex = tblEvents.convertRowIndexToModel(indexSelected);
-                    linkedList.updateEvent(modelIndex, id, name, date, category);
-                    refreshTable();
+                    String oldId = model.getValueAt(modelIndex, 0).toString();
 
-                    txtEventId.setText("");
-                    txtName.setText("");
-                    txtDate.setText("mm/dd/yyyy");
-                    txtDate.setForeground(Color.GRAY);
-                    cmbCategory.setSelectedIndex(0);
-                    tblEvents.clearSelection();
+                    if(eventManager.updateEvent(oldId, id, name, date, category)){
+                        refreshTable();
+
+                        txtEventId.setText("");
+                        txtName.setText("");
+                        txtDate.setText("mm/dd/yyyy");
+                        txtDate.setForeground(Color.GRAY);
+                        cmbCategory.setSelectedIndex(0);
+                        tblEvents.clearSelection();
+                    }else{
+                        JOptionPane.showMessageDialog(this, "Failed to update event", "Database Error", JOptionPane.ERROR_MESSAGE);
+                    }
                 }else{
                     JOptionPane.showMessageDialog(this, "Please fill in all fields", "Input Error", JOptionPane.ERROR_MESSAGE);
                 }
@@ -318,14 +336,19 @@ UIManager.put("TableHeader.cellBorder", BorderFactory.createMatteBorder(0, 0, 1,
 
             if(indexSelected != -1){
                 int modelIndex = tblEvents.convertRowIndexToModel(indexSelected);
-                linkedList.deleteEvent(modelIndex);
-                refreshTable();
+                String id = model.getValueAt(modelIndex, 0).toString();
 
-                txtEventId.setText("");
-                txtName.setText("");
-                txtDate.setText("mm/dd/yyyy");
-                txtDate.setForeground(Color.GRAY);
-                cmbCategory.setSelectedIndex(0);
+                if(eventManager.deleteEvent(id)){
+                    refreshTable();
+
+                    txtEventId.setText("");
+                    txtName.setText("");
+                    txtDate.setText("mm/dd/yyyy");
+                    txtDate.setForeground(Color.GRAY);
+                    cmbCategory.setSelectedIndex(0);
+                }else{
+                    JOptionPane.showMessageDialog(this, "Failed to delete event", "Database Error", JOptionPane.ERROR_MESSAGE);
+                }
             }else{
                 JOptionPane.showMessageDialog(this, "Please select an event first", "Input Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -344,20 +367,17 @@ UIManager.put("TableHeader.cellBorder", BorderFactory.createMatteBorder(0, 0, 1,
         }else if(e.getSource() == btnSearch){
     String text = txtSearchDate.getText().trim();
 
-  int[] searchColumns = {2, 3, 0};
-    int column = searchColumns[cmbSearchBy.getSelectedIndex()];
-
     if(text.isEmpty() || text.equals("mm/dd/yyyy")){
-        sorter.setRowFilter(null); // show all events
+        sorter.setRowFilter(null); 
     }else{
-        sorter.setRowFilter(RowFilter.regexFilter("(?i)" + text, column));
+        String searchBy = (String) cmbSearchBy.getSelectedItem();
+        sorter.setRowFilter(SearchAlgorithm.searchFilter(model, text, searchBy));
 
         if(tblEvents.getRowCount() == 0){
             JOptionPane.showMessageDialog(this, "No events found", "Search", JOptionPane.INFORMATION_MESSAGE);
         }
     }
-
-    }
+}
             else if(e.getSource()== btnBack){    
             dispose();
             Dashboard dashboard = new Dashboard();
