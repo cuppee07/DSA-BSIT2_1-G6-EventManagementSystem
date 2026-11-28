@@ -234,16 +234,10 @@ public class Signup extends JFrame implements ActionListener {
                 pst.setString(4, role);
                 
                 int rowsAffected = pst.executeUpdate();
-                if (rowsAffected > 0) {
+                if (rowsAffected > 0){
+                    JOptionPane.showMessageDialog(this, "Account created successfully! Please log in.");
                     dispose();
-                    if("Attendee".equalsIgnoreCase(role)){
-                        JOptionPane.showMessageDialog(this, "Account created successfully! Please log in.");
-                        new Registration("ATTENDEE").setVisible(true);
-                    }
-                    else{
-                        JOptionPane.showMessageDialog(this, "Account created successfully! Please log in.");
-                        new Login().setVisible(true);
-                    }
+                    new Login().setVisible(true);
                 }
             }
             catch (Exception ex) {
