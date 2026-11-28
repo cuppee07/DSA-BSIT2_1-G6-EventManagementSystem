@@ -121,6 +121,8 @@ public class Login extends JFrame implements ActionListener {
 
         loginButton = new JButton("Login");
         loginButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        loginButton.setOpaque(true);
+        loginButton.setContentAreaFilled(true);
         loginButton.setBackground(blue);
         loginButton.setForeground(Color.WHITE);
         loginButton.setFocusPainted(false);
@@ -169,16 +171,18 @@ public class Login extends JFrame implements ActionListener {
                         String role = rs.getString("role");
                         dispose();
 
-                        if ("Admin".equalsIgnoreCase(role)) {
+                        if("Admin".equalsIgnoreCase(role)) {
                             new Dashboard().setVisible(true); 
                         } 
-                        else { 
+                        else if("Attendee".equalsIgnoreCase(role)) {
                             new Registration("ATTENDEE").setVisible(true);
                         }
+                        else{
+                            JOptionPane.showMessageDialog(null, "Unknown role: " + role, "Login Error", JOptionPane.ERROR_MESSAGE);
+                            new Login().setVisible(true);
+                        }
                     } 
-                    else {
-                        JOptionPane.showMessageDialog(this, "Invalid username or password.", "Login Failed", JOptionPane.ERROR_MESSAGE);
-                    }
+                    
                 }
             } 
             catch (Exception ex) {
