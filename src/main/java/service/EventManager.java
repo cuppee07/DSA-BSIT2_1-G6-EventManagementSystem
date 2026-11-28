@@ -15,7 +15,7 @@ public class EventManager {
 
     private final String USER = "root";
 
-    private final String PASSWORD = "Manabat.10";
+    private final String PASSWORD = "*Cuppee07*";
 
     // Database connection
     private Connection getConnection() throws SQLException {
