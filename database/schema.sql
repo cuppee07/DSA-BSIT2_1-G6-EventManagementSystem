@@ -25,6 +25,14 @@ CREATE TABLE IF NOT EXISTS registrations (
     checked_in_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     
+CREATE TABLE IF NOT EXISTS events (
+    event_id VARCHAR(50) PRIMARY KEY,
+    event_name VARCHAR(100) NOT NULL,
+    event_date VARCHAR(20) NOT NULL,
+    category VARCHAR(50) NOT NULL,
+    attendees INT NOT NULL DEFAULT 0
+);
+    
 INSERT IGNORE INTO users (id, email, username, password, role)
 VALUES (
     1,
